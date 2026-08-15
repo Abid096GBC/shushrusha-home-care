@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Info, Syringe } from "lucide-react";
-import { INJECTION_PRICES, SITE, waLink } from "@/lib/site";
+import { BILLING_NOTE, INJECTION_PRICES, SITE, waLink } from "@/lib/site";
 
 type Category = keyof typeof INJECTION_PRICES;
 type RouteType = "IV" | "IM";
@@ -35,6 +35,7 @@ export function InjectionModal({ children }: { children: ReactNode }) {
   const [category, setCategory] = useState<Category | "">("");
   const [route, setRoute] = useState<RouteType | "">("");
   const [location, setLocation] = useState("");
+  const [referral, setReferral] = useState("");
   const [error, setError] = useState("");
 
   const price = category && route ? INJECTION_PRICES[category][route] : null;

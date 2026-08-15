@@ -67,7 +67,14 @@ export function InjectionModal({ children }: { children: ReactNode }) {
     const parsed = schema.safeParse({ medicine, location });
     if (!parsed.success) return setError(parsed.error.issues[0]?.message ?? "তথ্য পূরণ করুন");
     const age = category === "বাচ্চা / Child" ? "Child" : "Adult";
-    const msg = `Hello Shushrusha, I need Injection Push. Medicine: ${parsed.data.medicine}, Age: ${age}, Type: ${route}, Location: ${parsed.data.location}. (আনুমানিক মূল্য: ${price} + কনভিনিয়েন্স চার্জ)`;
+    const msg = [
+      `Hello ${SITE.nameEn}, I want to book a service.`,
+      `Service: Injection Push (${route}) — ${parsed.data.medicine}`,
+      `Patient: ${age}`,
+      `Referral Code: ${referral.trim() || "None"}`,
+      `Address: ${parsed.data.location}`,
+      `Estimated: ${price}`,
+    ].join("\n");
     window.open(waLink(msg), "_blank", "noopener,noreferrer");
     setOpen(false);
     reset();

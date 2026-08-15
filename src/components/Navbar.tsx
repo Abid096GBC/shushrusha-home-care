@@ -39,7 +39,7 @@ export function Navbar() {
 
         <div className="hidden items-center gap-2 md:flex">
           <Button asChild variant="whatsapp" size="sm">
-            <a href={waLink("আমি শুশ্রূষা সেবা বুক করতে চাই।")} target="_blank" rel="noopener noreferrer">
+            <a href={waLink("Hello Shushrusha, I would like to book a service.")} target="_blank" rel="noopener noreferrer">
               <MessageCircle /> WhatsApp Booking
             </a>
           </Button>
@@ -77,7 +77,7 @@ export function Navbar() {
           </ul>
           <div className="mt-3 grid grid-cols-2 gap-2 md:hidden">
             <Button asChild variant="whatsapp" size="sm">
-              <a href={waLink("আমি শুশ্রূষা সেবা বুক করতে চাই।")} target="_blank" rel="noopener noreferrer">
+              <a href={waLink("Hello Shushrusha, I would like to book a service.")} target="_blank" rel="noopener noreferrer">
                 <MessageCircle /> WhatsApp
               </a>
             </Button>

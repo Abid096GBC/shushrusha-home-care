@@ -146,17 +146,30 @@ export function InjectionModal({ children }: { children: ReactNode }) {
           )}
 
           {step === 4 && (
-            <div>
-              <Label htmlFor="location">ধাপ ৪ — আপনার ঠিকানা / এলাকা</Label>
-              <Input
-                id="location"
-                value={location}
-                maxLength={200}
-                onChange={(e) => setLocation(e.target.value)}
-                className="mt-1.5"
-                placeholder="বাসা, রোড, এলাকা"
-              />
-            </div>
+            <>
+              <div>
+                <Label htmlFor="location">ধাপ ৪ — আপনার ঠিকানা / এলাকা</Label>
+                <Input
+                  id="location"
+                  value={location}
+                  maxLength={200}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="mt-1.5"
+                  placeholder="বাসা, রোড, এলাকা"
+                />
+              </div>
+              <div>
+                <Label htmlFor="referral">রেফারাল / প্রমো কোড (যদি থাকে)</Label>
+                <Input
+                  id="referral"
+                  value={referral}
+                  maxLength={40}
+                  onChange={(e) => setReferral(e.target.value)}
+                  className="mt-1.5"
+                  placeholder="e.g., ROHIM50"
+                />
+              </div>
+            </>
           )}
 
           {price && (
@@ -166,9 +179,7 @@ export function InjectionModal({ children }: { children: ReactNode }) {
             </div>
           )}
 
-          <p className="flex items-start gap-2 rounded-lg bg-muted p-3 text-xs leading-relaxed text-muted-foreground">
-            <Info className="mt-0.5 size-4 shrink-0 text-accent" /> {SITE.conveyanceShort}
-          </p>
+          <p className="text-xs leading-relaxed text-muted-foreground">{BILLING_NOTE}</p>
 
           {error && <p className="text-xs text-destructive">{error}</p>}
 

@@ -46,6 +46,7 @@ export function InjectionModal({ children }: { children: ReactNode }) {
     setCategory("");
     setRoute("");
     setLocation("");
+    setReferral("");
     setError("");
   }
 

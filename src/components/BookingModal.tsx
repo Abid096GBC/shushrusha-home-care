@@ -31,6 +31,7 @@ export function BookingModal({ children, service }: { children: ReactNode; servi
       address: String(fd.get("address") ?? ""),
       service: service ?? String(fd.get("service") ?? ""),
       datetime: String(fd.get("datetime") ?? ""),
+      referral: String(fd.get("referral") ?? ""),
       notes: String(fd.get("notes") ?? ""),
     };
     const parsed = schema.safeParse(data);
@@ -43,13 +44,13 @@ export function BookingModal({ children, service }: { children: ReactNode; servi
     setErrors({});
     const d = parsed.data;
     const msg = [
-      `🩺 ${SITE.name} — সেবা বুকিং অনুরোধ`,
-      `রোগীর নাম: ${d.name}`,
-      `ফোন: ${d.phone}`,
-      `ঠিকানা: ${d.address}`,
-      `সেবা: ${d.service}`,
-      `সময়: ${d.datetime}`,
-      d.notes ? `বিশেষ নোট: ${d.notes}` : "",
+      `Hello ${SITE.nameEn}, I want to book a service.`,
+      `Service: ${d.service}`,
+      `Patient: ${d.name} (${d.phone})`,
+      `Referral Code: ${d.referral ? d.referral : "None"}`,
+      `Address: ${d.address}`,
+      `Preferred Time: ${d.datetime}`,
+      d.notes ? `Notes: ${d.notes}` : "",
     ]
       .filter(Boolean)
       .join("\n");

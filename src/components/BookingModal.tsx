@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { SERVICES, SITE, waLink } from "@/lib/site";
+import { BILLING_NOTE, SERVICES, SITE, waLink } from "@/lib/site";
 
 const schema = z.object({
   name: z.string().trim().min(2, "রোগীর নাম লিখুন").max(80),
@@ -13,6 +13,7 @@ const schema = z.object({
   address: z.string().trim().min(4, "ঠিকানা লিখুন").max(200),
   service: z.string().min(1, "সেবা নির্বাচন করুন"),
   datetime: z.string().min(1, "তারিখ ও সময় নির্বাচন করুন"),
+  referral: z.string().trim().max(40).optional(),
   notes: z.string().trim().max(500).optional(),
 });
 
@@ -123,10 +124,15 @@ export function BookingModal({ children, service }: { children: ReactNode; servi
           )}
 
           <div>
+            <Label htmlFor="referral">রেফারাল / প্রমো কোড (যদি থাকে)</Label>
+            <Input id="referral" name="referral" maxLength={40} className={field} placeholder="e.g., ROHIM50" />
+          </div>
+          <div>
             <Label htmlFor="notes">বিশেষ নোট</Label>
             <Textarea id="notes" name="notes" maxLength={500} className={field} placeholder="রোগীর অবস্থা বা অন্য কিছু জানানোর থাকলে লিখুন" />
             {err("notes")}
           </div>
+          <p className="text-xs leading-relaxed text-muted-foreground">{BILLING_NOTE}</p>
           <Button type="submit" variant="whatsapp" size="lg" className="w-full">
             WhatsApp-এ অনুরোধ পাঠান
           </Button>

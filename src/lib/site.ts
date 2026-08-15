@@ -10,6 +10,9 @@ export const SITE = {
   conveyanceShort: "কনভিনিয়েন্স চার্জ: দূরত্ব অনুযায়ী সর্বনিম্ন ৳৫০+ যুক্ত হবে।",
 };
 
+export const BILLING_NOTE =
+  "ℹ️ * সার্ভিস লোকেশন ও দূরত্বের ওপর ভিত্তি করে কনভিনিয়েন্স চার্জ (সর্বনিম্ন ৳৫০) চূড়ান্ত বিলে যুক্ত হতে পারে।";
+
 export type Service = {
   id: string;
   title: string;

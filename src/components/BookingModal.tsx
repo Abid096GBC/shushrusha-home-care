@@ -16,9 +16,10 @@ const schema = z.object({
   notes: z.string().trim().max(500).optional(),
 });
 
-export function BookingModal({ children }: { children: ReactNode }) {
+export function BookingModal({ children, service }: { children: ReactNode; service?: string }) {
   const [open, setOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

@@ -6,7 +6,7 @@ import { SITE, waLink } from "@/lib/site";
 const LINKS = [
   { href: "#home", label: "হোম" },
   { href: "#services", label: "সেবাসমূহ" },
-  { href: "#packages", label: "প্যাকেজ" },
+  { href: "#packages", label: "ফ্রি গাইডেন্স" },
   { href: "#about", label: "আমাদের সম্পর্কে" },
   { href: "#contact", label: "যোগাযোগ" },
 ];

@@ -16,9 +16,10 @@ const schema = z.object({
   notes: z.string().trim().max(500).optional(),
 });
 
-export function BookingModal({ children }: { children: ReactNode }) {
+export function BookingModal({ children, service }: { children: ReactNode; service?: string }) {
   const [open, setOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -27,7 +28,7 @@ export function BookingModal({ children }: { children: ReactNode }) {
       name: String(fd.get("name") ?? ""),
       phone: String(fd.get("phone") ?? ""),
       address: String(fd.get("address") ?? ""),
-      service: String(fd.get("service") ?? ""),
+      service: service ?? String(fd.get("service") ?? ""),
       datetime: String(fd.get("datetime") ?? ""),
       notes: String(fd.get("notes") ?? ""),
     };
@@ -92,25 +93,35 @@ export function BookingModal({ children }: { children: ReactNode }) {
             <Input id="address" name="address" maxLength={200} className={field} placeholder="বাসা, রোড, এলাকা" />
             {err("address")}
           </div>
-          <div>
-            <Label htmlFor="service">সেবা নির্বাচন করুন</Label>
-            <select
-              id="service"
-              name="service"
-              defaultValue=""
-              className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="" disabled>
-                — নির্বাচন করুন —
-              </option>
-              {SERVICES.map((s) => (
-                <option key={s.id} value={s.title}>
-                  {s.title} ({s.titleEn})
+          {service ? (
+            <div>
+              <Label>সেবা</Label>
+              <p className="mt-1.5 rounded-md border border-primary/20 bg-secondary px-3 py-2 text-sm font-medium text-primary">
+                {service}
+              </p>
+            </div>
+          ) : (
+            <div>
+              <Label htmlFor="service">সেবা নির্বাচন করুন</Label>
+              <select
+                id="service"
+                name="service"
+                defaultValue=""
+                className="mt-1.5 h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="" disabled>
+                  — নির্বাচন করুন —
                 </option>
-              ))}
-            </select>
-            {err("service")}
-          </div>
+                {SERVICES.map((s) => (
+                  <option key={s.id} value={s.title}>
+                    {s.title} ({s.titleEn})
+                  </option>
+                ))}
+              </select>
+              {err("service")}
+            </div>
+          )}
+
           <div>
             <Label htmlFor="notes">বিশেষ নোট</Label>
             <Textarea id="notes" name="notes" maxLength={500} className={field} placeholder="রোগীর অবস্থা বা অন্য কিছু জানানোর থাকলে লিখুন" />

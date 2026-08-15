@@ -14,7 +14,7 @@ import {
   ShieldCheck,
   Stethoscope,
   Syringe,
-  Truck,
+  
   Wallet,
   Wind,
 } from "lucide-react";
@@ -100,9 +100,6 @@ function Home() {
                     <MessageCircle /> WhatsApp Chat
                   </a>
                 </Button>
-              </div>
-              <div className="mt-7 flex items-start gap-2 rounded-xl border border-accent/30 bg-card p-3 text-sm text-muted-foreground">
-                <Truck className="mt-0.5 size-4 shrink-0 text-accent" /> {SITE.conveyance}
               </div>
             </div>
             <div className="relative">

@@ -11,8 +11,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Info, Syringe } from "lucide-react";
-import { INJECTION_PRICES, SITE, waLink } from "@/lib/site";
+import { Syringe } from "lucide-react";
+import { BILLING_NOTE, INJECTION_PRICES, SITE, waLink } from "@/lib/site";
 
 type Category = keyof typeof INJECTION_PRICES;
 type RouteType = "IV" | "IM";
@@ -35,6 +35,7 @@ export function InjectionModal({ children }: { children: ReactNode }) {
   const [category, setCategory] = useState<Category | "">("");
   const [route, setRoute] = useState<RouteType | "">("");
   const [location, setLocation] = useState("");
+  const [referral, setReferral] = useState("");
   const [error, setError] = useState("");
 
   const price = category && route ? INJECTION_PRICES[category][route] : null;
@@ -45,6 +46,7 @@ export function InjectionModal({ children }: { children: ReactNode }) {
     setCategory("");
     setRoute("");
     setLocation("");
+    setReferral("");
     setError("");
   }
 
@@ -65,7 +67,14 @@ export function InjectionModal({ children }: { children: ReactNode }) {
     const parsed = schema.safeParse({ medicine, location });
     if (!parsed.success) return setError(parsed.error.issues[0]?.message ?? "তথ্য পূরণ করুন");
     const age = category === "বাচ্চা / Child" ? "Child" : "Adult";
-    const msg = `Hello Shushrusha, I need Injection Push. Medicine: ${parsed.data.medicine}, Age: ${age}, Type: ${route}, Location: ${parsed.data.location}. (আনুমানিক মূল্য: ${price} + কনভিনিয়েন্স চার্জ)`;
+    const msg = [
+      `Hello ${SITE.nameEn}, I want to book a service.`,
+      `Service: Injection Push (${route}) — ${parsed.data.medicine}`,
+      `Patient: ${age}`,
+      `Referral Code: ${referral.trim() || "None"}`,
+      `Address: ${parsed.data.location}`,
+      `Estimated: ${price}`,
+    ].join("\n");
     window.open(waLink(msg), "_blank", "noopener,noreferrer");
     setOpen(false);
     reset();
@@ -146,17 +155,30 @@ export function InjectionModal({ children }: { children: ReactNode }) {
           )}
 
           {step === 4 && (
-            <div>
-              <Label htmlFor="location">ধাপ ৪ — আপনার ঠিকানা / এলাকা</Label>
-              <Input
-                id="location"
-                value={location}
-                maxLength={200}
-                onChange={(e) => setLocation(e.target.value)}
-                className="mt-1.5"
-                placeholder="বাসা, রোড, এলাকা"
-              />
-            </div>
+            <>
+              <div>
+                <Label htmlFor="location">ধাপ ৪ — আপনার ঠিকানা / এলাকা</Label>
+                <Input
+                  id="location"
+                  value={location}
+                  maxLength={200}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="mt-1.5"
+                  placeholder="বাসা, রোড, এলাকা"
+                />
+              </div>
+              <div>
+                <Label htmlFor="referral">রেফারাল / প্রমো কোড (যদি থাকে)</Label>
+                <Input
+                  id="referral"
+                  value={referral}
+                  maxLength={40}
+                  onChange={(e) => setReferral(e.target.value)}
+                  className="mt-1.5"
+                  placeholder="e.g., ROHIM50"
+                />
+              </div>
+            </>
           )}
 
           {price && (
@@ -166,9 +188,7 @@ export function InjectionModal({ children }: { children: ReactNode }) {
             </div>
           )}
 
-          <p className="flex items-start gap-2 rounded-lg bg-muted p-3 text-xs leading-relaxed text-muted-foreground">
-            <Info className="mt-0.5 size-4 shrink-0 text-accent" /> {SITE.conveyanceShort}
-          </p>
+          <p className="text-xs leading-relaxed text-muted-foreground">{BILLING_NOTE}</p>
 
           {error && <p className="text-xs text-destructive">{error}</p>}
 

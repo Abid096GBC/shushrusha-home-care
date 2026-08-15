@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Info, Syringe } from "lucide-react";
+import { Syringe } from "lucide-react";
 import { BILLING_NOTE, INJECTION_PRICES, SITE, waLink } from "@/lib/site";
 
 type Category = keyof typeof INJECTION_PRICES;

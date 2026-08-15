@@ -102,7 +102,7 @@ function Home() {
                   </Button>
                 </BookingModal>
                 <Button asChild variant="whatsapp" size="lg">
-                  <a href={waLink("আমি শুশ্রূষা সেবা সম্পর্কে জানতে চাই।")} target="_blank" rel="noopener noreferrer">
+                  <a href={waLink("Hello Shushrusha, I would like to book a service.")} target="_blank" rel="noopener noreferrer">
                     <MessageCircle /> WhatsApp Chat
                   </a>
                 </Button>

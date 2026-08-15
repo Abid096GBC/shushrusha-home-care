@@ -4,7 +4,7 @@ import { waLink } from "@/lib/site";
 export function WhatsAppFab() {
   return (
     <a
-      href={waLink("আসসালামু আলাইকুম, আমি শুশ্রূষা থেকে হোম নার্সিং সেবা নিতে চাই।")}
+      href={waLink("Hello Shushrusha, I would like to book a service.")}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="WhatsApp চ্যাট"

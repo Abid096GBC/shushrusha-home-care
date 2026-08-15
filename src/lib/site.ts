@@ -1,10 +1,10 @@
 export const SITE = {
   name: "শুশ্রূষা",
   nameEn: "Shushrusha",
-  phone: "+8801700000000",
-  phoneDisplay: "+880 1700-000000",
-  whatsapp: "8801700000000",
-  email: "care@shushrusha.com",
+  phone: "+8801628402283",
+  phoneDisplay: "+880 1628-402283",
+  whatsapp: "8801628402283",
+  email: "mdadhassan123@gmail.com",
   areas: ["ঢাকা", "নারায়ণগঞ্জ", "গাজীপুর", "চট্টগ্রাম"],
 };
 

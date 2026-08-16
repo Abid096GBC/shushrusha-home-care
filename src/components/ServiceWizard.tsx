@@ -352,6 +352,21 @@ function stepsFor(id: string): Step[] {
           ),
         },
       ];
+    case "product":
+      return [
+        {
+          title: "পরিমাণ নির্বাচন করুন",
+          validate: (s) => (Number(s["qty"] ?? 1) > 0 ? null : "পরিমাণ দিন"),
+          render: (s, set) => (
+            <div>
+              <Counter value={Number(s["qty"] ?? 1)} onChange={(n) => set({ qty: Math.max(1, n) })} />
+              <p className="mt-3 text-center text-sm text-muted-foreground">
+                {String(s["product"] ?? "")} — একক মূল্য ৳{Number(s["unit_price"] ?? 0)}
+              </p>
+            </div>
+          ),
+        },
+      ];
     default:
       return [
         {
@@ -395,6 +410,8 @@ function estimate(id: string, s: State): string {
       return s["cannula"] === "নতুন ক্যানুলা প্রয়োজন" ? "৳৪০০ (আনুমানিক)" : "৳৩০০ (আনুমানিক)";
     case "translator":
       return "সম্পূর্ণ ফ্রি";
+    case "product":
+      return `৳${Number(s["unit_price"] ?? 0) * Number(s["qty"] ?? 1)}`;
     default:
       return "কাস্টম প্যাকেজ";
   }

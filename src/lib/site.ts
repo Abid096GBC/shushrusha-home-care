@@ -34,6 +34,15 @@ export const SERVICES: Service[] = [
     primary: true,
   },
   {
+    id: "suturing",
+    title: "সেলাই করা ও সেলাই কাটা",
+    titleEn: "Wound Suturing & Stitch Removal",
+    desc: "শরীরের অংশ ও সেলাই সংখ্যা অনুযায়ী মূল্য নির্ধারিত হয়।",
+    price: "৳৪০০ থেকে শুরু",
+    priceNote: "প্রতি সেলাই ৳৫০ (আনুমানিক)",
+    primary: true,
+  },
+  {
     id: "dressing",
     title: "ড্রেসিং সেবা",
     titleEn: "Wound Dressing",
@@ -75,6 +84,13 @@ export const SERVICES: Service[] = [
     primary: true,
   },
   {
+    id: "translator",
+    title: "ফ্রি মেডিকেল ট্রান্সলেটর",
+    titleEn: "Free Medical Translator",
+    desc: "প্রেসক্রিপশন বা রিপোর্টের ছবি পাঠান — বাংলায় বুঝিয়ে দেব।",
+    price: "সম্পূর্ণ ফ্রি",
+  },
+  {
     id: "caregiving",
     title: "প্রবীণদের সার্বক্ষণিক যত্ন",
     titleEn: "Caregiving / Elderly Care",
@@ -91,3 +107,24 @@ export const INJECTION_PRICES = {
 export function waLink(message: string) {
   return `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(message)}`;
 }
+
+export type Product = {
+  id: string;
+  name: string;
+  nameEn: string;
+  price: number;
+  unit: string;
+};
+
+export const PRODUCTS: Product[] = [
+  { id: "gauze", name: "স্টেরাইল গজ", nameEn: "Sterile Gauze", price: 60, unit: "প্যাক" },
+  { id: "hexisol", name: "হেক্সিসল হ্যান্ড রাব", nameEn: "Hexisol", price: 120, unit: "বোতল" },
+  { id: "bandage", name: "ব্যান্ডেজ রোল", nameEn: "Bandage Roll", price: 80, unit: "পিস" },
+  { id: "micropore", name: "মাইক্রোপোর টেপ", nameEn: "Micro-pore Tape", price: 70, unit: "রোল" },
+  { id: "neb-mask", name: "নেবুলাইজার মাস্ক", nameEn: "Nebulizer Mask", price: 150, unit: "সেট" },
+  { id: "bp-monitor", name: "ডিজিটাল বিপি মনিটর", nameEn: "BP Monitor", price: 2200, unit: "পিস" },
+  { id: "dressing-kit", name: "ড্রেসিং কিট", nameEn: "Dressing Kit", price: 120, unit: "কিট" },
+  { id: "glucometer", name: "গ্লুকোমিটার স্ট্রিপ", nameEn: "Glucometer Strips", price: 650, unit: "বক্স" },
+];
+
+export const DRESSING_KIT_PRICE = 120;

@@ -5,12 +5,8 @@ import { Loader2, LockKeyhole, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  STATUSES,
-  adminListBookings,
-  adminUpdateStatus,
-  type BookingRow,
-} from "@/lib/bookings.functions";
+import { adminListBookings, adminUpdateStatus } from "@/lib/bookings.functions";
+import { STATUSES, type BookingRow } from "@/lib/booking-types";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({

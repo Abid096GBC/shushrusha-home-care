@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { BookingRow } from "@/lib/booking-types";
+import { STATUSES } from "@/lib/booking-types";
 
 const bookingSchema = z.object({
   service: z.string().trim().min(2).max(120),
@@ -16,34 +18,15 @@ const bookingSchema = z.object({
 
 export type BookingInput = z.input<typeof bookingSchema>;
 
-export type BookingRow = {
-  id: string;
-  tracking_id: string;
-  service: string;
-  customer_name: string;
-  phone: string;
-  address: string;
-  details: Record<string, string | number | boolean>;
-  body_region: string | null;
-  stitch_count: number | null;
-  referral_code: string | null;
-  price_estimate: string | null;
-  notes: string | null;
-  status: string;
-  created_at: string;
-};
-
-export const STATUSES = ["Pending", "Confirmed", "Nurse Assigned", "Completed"] as const;
-
 export const createBooking = createServerFn({ method: "POST" })
   .inputValidator((data: BookingInput) => bookingSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const tracking = `SHU-${Math.floor(1000 + Math.random() * 8999)}`;
+    const { makeTrackingId } = await import("@/lib/admin-auth.server");
     const { data: row, error } = await supabaseAdmin
       .from("bookings")
       .insert({
-        tracking_id: tracking,
+        tracking_id: makeTrackingId(),
         service: data.service,
         customer_name: data.customer_name,
         phone: data.phone,
@@ -61,16 +44,12 @@ export const createBooking = createServerFn({ method: "POST" })
     return { trackingId: row.tracking_id as string };
   });
 
-function checkPassword(password: string) {
-  const expected = process.env["ADMIN_PASSWORD"];
-  if (!expected || password !== expected) throw new Error("Invalid admin password");
-}
-
 export const adminListBookings = createServerFn({ method: "POST" })
   .inputValidator((data: { password: string }) =>
     z.object({ password: z.string().min(1).max(200) }).parse(data),
   )
   .handler(async ({ data }) => {
+    const { checkPassword } = await import("@/lib/admin-auth.server");
     checkPassword(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
@@ -93,6 +72,7 @@ export const adminUpdateStatus = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data }) => {
+    const { checkPassword } = await import("@/lib/admin-auth.server");
     checkPassword(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin

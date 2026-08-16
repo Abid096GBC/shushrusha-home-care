@@ -23,7 +23,7 @@ export type BookingRow = {
   customer_name: string;
   phone: string;
   address: string;
-  details: Record<string, unknown>;
+  details: Record<string, string | number | boolean>;
   body_region: string | null;
   stitch_count: number | null;
   referral_code: string | null;

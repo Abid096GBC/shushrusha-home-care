@@ -2,6 +2,7 @@ import { useState } from "react";
 import { HeartPulse, Menu, Phone, X, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SITE, waLink } from "@/lib/site";
+import { TrackOrder } from "@/components/TrackOrder";
 
 const LINKS = [
   { href: "#home", label: "হোম" },
@@ -39,6 +40,7 @@ export function Navbar() {
         </ul>
 
         <div className="hidden items-center gap-2 md:flex">
+          <TrackOrder />
           <Button asChild variant="whatsapp" size="sm">
             <a href={waLink("Hello Shushrusha, I would like to book a service.")} target="_blank" rel="noopener noreferrer">
               <MessageCircle /> WhatsApp Booking
@@ -76,6 +78,7 @@ export function Navbar() {
               </li>
             ))}
           </ul>
+          <div className="mt-3"><TrackOrder /></div>
           <div className="mt-3 grid grid-cols-2 gap-2 md:hidden">
             <Button asChild variant="whatsapp" size="sm">
               <a href={waLink("Hello Shushrusha, I would like to book a service.")} target="_blank" rel="noopener noreferrer">

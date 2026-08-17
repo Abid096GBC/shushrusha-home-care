@@ -490,6 +490,7 @@ export function ServiceWizard({
           stitch_count: state["stitch_count"] ? Number(state["stitch_count"]) : undefined,
           referral_code: contact.referral.trim() || undefined,
           price_estimate: price,
+          amount: est.amount,
           notes: contact.notes.trim() || undefined,
         },
       });

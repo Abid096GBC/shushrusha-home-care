@@ -385,35 +385,54 @@ function stepsFor(id: string): Step[] {
   }
 }
 
-function estimate(id: string, s: State): string {
+function bn(n: number) {
+  return `৳${n.toLocaleString("en-US")}`;
+}
+
+function estimate(id: string, s: State): { label: string; amount?: number } {
+  const P = PRICES;
   switch (id) {
     case "injection": {
-      const child = s["category"] === "বাচ্চা / Child";
-      if (!child) return "৳৩০০";
-      return s["route"] === "IM" ? "৳৫০০ – ৳৮০০" : "৳৫০০";
+      const amount = s["category"] === "বাচ্চা / Child" ? P.injectionChild : P.injectionAdult;
+      return { label: bn(amount), amount };
     }
     case "suturing": {
       const n = Number(s["stitch_count"] ?? 0);
-      const base = s["suture_type"] === "সেলাই কাটা / Stitch Removal" ? 300 : 400;
-      return `৳${base + n * 50} (আনুমানিক)`;
+      const rate = s["suture_type"] === "সেলাই কাটা / Stitch Removal" ? P.stitchRemovalPerStitch : P.suturingPerStitch;
+      const amount = n * rate;
+      return { label: `${bn(amount)} (${n} × ${bn(rate)})`, amount };
     }
     case "dressing": {
-      const base = s["severity"] === "বড় / পোড়া ক্ষত (Large)" ? 600 : s["severity"] === "সেলাই ড্রেসিং (Medium)" ? 400 : 300;
-      return `৳${base + (s["dressing_kit"] === true ? DRESSING_KIT_PRICE : 0)}`;
+      const amount = P.dressing + (s["dressing_kit"] === true ? DRESSING_KIT_PRICE : 0);
+      return { label: bn(amount), amount };
     }
-    case "nebulizer":
-      return s["mode"] === "মেশিন রেন্ট ৭ দিন (৳৫০০)" ? "৳৫০০" : "৳১০০";
+    case "nebulizer": {
+      const mode = String(s["mode"] ?? "");
+      const amount = mode.includes("রেন্ট") ? P.nebRent : mode.includes("ওষুধসহ") ? P.nebWithMed : P.nebNoMed;
+      return { label: bn(amount), amount };
+    }
     case "vitals": {
-      return "৳১০০";
+      const n = [s["bp"], s["glucose"], s["spo2"]].filter(Boolean).length;
+      const amount = n >= 3 ? P.vitals3 : n === 2 ? P.vitals2 : P.vitals1;
+      return { label: bn(amount), amount };
     }
-    case "saline":
-      return s["cannula"] === "নতুন ক্যানুলা প্রয়োজন" ? "৳৪০০ (আনুমানিক)" : "৳৩০০ (আনুমানিক)";
+    case "saline": {
+      const mode = String(s["saline_mode"] ?? "");
+      const amount = mode.includes("ক্যানুলা + স্যালাইন")
+        ? P.cannulaSaline
+        : mode.includes("ক্যানুলা")
+          ? P.cannulaOnly
+          : P.salineOnly;
+      return { label: bn(amount), amount };
+    }
     case "translator":
-      return "সম্পূর্ণ ফ্রি";
-    case "product":
-      return `৳${Number(s["unit_price"] ?? 0) * Number(s["qty"] ?? 1)}`;
+      return { label: "সম্পূর্ণ ফ্রি", amount: 0 };
+    case "product": {
+      const amount = Number(s["unit_price"] ?? 0) * Number(s["qty"] ?? 1);
+      return { label: bn(amount), amount };
+    }
     default:
-      return "কাস্টম প্যাকেজ";
+      return { label: "কাস্টম প্যাকেজ" };
   }
 }
 

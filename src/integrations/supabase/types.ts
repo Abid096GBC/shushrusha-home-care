@@ -17,13 +17,18 @@ export type Database = {
       bookings: {
         Row: {
           address: string
+          amount: number | null
           body_region: string | null
           created_at: string
           customer_name: string
           details: Json
           id: string
           notes: string | null
+          nurse_id: string | null
+          nurse_share: number | null
+          payment_status: string
           phone: string
+          platform_share: number | null
           price_estimate: string | null
           referral_code: string | null
           service: string
@@ -34,13 +39,18 @@ export type Database = {
         }
         Insert: {
           address: string
+          amount?: number | null
           body_region?: string | null
           created_at?: string
           customer_name: string
           details?: Json
           id?: string
           notes?: string | null
+          nurse_id?: string | null
+          nurse_share?: number | null
+          payment_status?: string
           phone: string
+          platform_share?: number | null
           price_estimate?: string | null
           referral_code?: string | null
           service: string
@@ -51,19 +61,113 @@ export type Database = {
         }
         Update: {
           address?: string
+          amount?: number | null
           body_region?: string | null
           created_at?: string
           customer_name?: string
           details?: Json
           id?: string
           notes?: string | null
+          nurse_id?: string | null
+          nurse_share?: number | null
+          payment_status?: string
           phone?: string
+          platform_share?: number | null
           price_estimate?: string | null
           referral_code?: string | null
           service?: string
           status?: string
           stitch_count?: number | null
           tracking_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "nurses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_items: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          item_key: string
+          kind: string
+          name: string
+          name_en: string
+          price: number
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          item_key: string
+          kind?: string
+          name: string
+          name_en?: string
+          price?: number
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          item_key?: string
+          kind?: string
+          name?: string
+          name_en?: string
+          price?: number
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      nurses: {
+        Row: {
+          area: string | null
+          completed_visits: number
+          created_at: string
+          id: string
+          name: string
+          nurse_code: string
+          phone: string
+          rating: number
+          specialties: string[]
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          area?: string | null
+          completed_visits?: number
+          created_at?: string
+          id?: string
+          name: string
+          nurse_code: string
+          phone: string
+          rating?: number
+          specialties?: string[]
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          area?: string | null
+          completed_visits?: number
+          created_at?: string
+          id?: string
+          name?: string
+          nurse_code?: string
+          phone?: string
+          rating?: number
+          specialties?: string[]
+          status?: string
           updated_at?: string
         }
         Relationships: []

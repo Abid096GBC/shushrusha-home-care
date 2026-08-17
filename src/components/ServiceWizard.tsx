@@ -448,7 +448,8 @@ export function ServiceWizard({
 
   const custom = stepsFor(serviceId);
   const total = custom.length + 1;
-  const price = estimate(serviceId, state);
+  const est = estimate(serviceId, state);
+  const price = est.label;
 
   function set(patch: State) {
     setState((prev) => ({ ...prev, ...patch }));

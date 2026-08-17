@@ -11,7 +11,27 @@ export const SITE = {
 };
 
 export const BILLING_NOTE =
-  "ℹ️ * সার্ভিস লোকেশন ও দূরত্বের ওপর ভিত্তি করে কনভিনিয়েন্স চার্জ (সর্বনিম্ন ৳৫০) চূড়ান্ত বিলে যুক্ত হতে পারে।";
+  "ℹ️ * সার্ভিস লোকেশন ও দূরত্বের ওপর ভিত্তি করে কনভিনিয়েন্স চার্জ (সর্বনিম্ন ৳৫০) ও নাইট চার্জ (রাত ১০টার পর ৳৩০০) যুক্ত হতে পারে।";
+
+export const NIGHT_FEE = 300;
+export const CONVENIENCE_FEE = 50;
+
+export const PRICES = {
+  injectionAdult: 300,
+  injectionChild: 500,
+  salineOnly: 300,
+  cannulaOnly: 500,
+  cannulaSaline: 600,
+  dressing: 300,
+  stitchRemovalPerStitch: 100,
+  suturingPerStitch: 300,
+  nebNoMed: 50,
+  nebWithMed: 100,
+  nebRent: 500,
+  vitals1: 150,
+  vitals2: 200,
+  vitals3: 250,
+};
 
 export type Service = {
   id: string;
@@ -30,7 +50,7 @@ export const SERVICES: Service[] = [
     titleEn: "Injection Push (IV / IM)",
     desc: "প্রশিক্ষিত নার্সের মাধ্যমে ঘরে বসেই নিরাপদ ইনজেকশন পুশ।",
     price: "৳৩০০ থেকে শুরু",
-    priceNote: "বড়: ৳৩০০ (IV/IM) • বাচ্চা: ৳৫০০ (IV), ৳৫০০–৮০০ (IM)",
+    priceNote: "বড়: ৳৩০০ (IV/IM) • বাচ্চা: ৳৫০০ (IV/IM)",
     primary: true,
   },
   {
@@ -38,16 +58,16 @@ export const SERVICES: Service[] = [
     title: "সেলাই করা ও সেলাই কাটা",
     titleEn: "Wound Suturing & Stitch Removal",
     desc: "শরীরের অংশ ও সেলাই সংখ্যা অনুযায়ী মূল্য নির্ধারিত হয়।",
-    price: "৳৪০০ থেকে শুরু",
-    priceNote: "প্রতি সেলাই ৳৫০ (আনুমানিক)",
+    price: "সেলাই কাটা ৳১০০ / সেলাই",
+    priceNote: "নতুন সেলাই: ৳৩০০ প্রতি সেলাই (সুচার ম্যাটেরিয়াল আলাদা)",
     primary: true,
   },
   {
     id: "dressing",
     title: "ড্রেসিং সেবা",
     titleEn: "Wound Dressing",
-    desc: "ক্ষত বা সার্জারি সেলাইয়ের ওপর ভিত্তি করে নির্ধারণযোগ্য।",
-    price: "৳৩০০ থেকে শুরু",
+    desc: "শুধু সার্ভিস চার্জ — ওষুধ ও ড্রেসিং সামগ্রী আলাদা।",
+    price: "৳৩০০",
     primary: true,
   },
   {
@@ -55,8 +75,8 @@ export const SERVICES: Service[] = [
     title: "নেবুলাইজার সেবা",
     titleEn: "Nebulizer",
     desc: "শ্বাসকষ্টে দ্রুত নেবুলাইজেশন সাপোর্ট, মেশিন রেন্টসহ।",
-    price: "৳১০০ / বার",
-    priceNote: "মেশিন রেন্ট: ৳৫০০ (৭ দিনের জন্য)",
+    price: "৳৫০ থেকে শুরু",
+    priceNote: "ওষুধসহ ৳১০০ • ৭ দিনের মেশিন রেন্ট ৳৫০০",
     primary: true,
   },
   {
@@ -64,7 +84,8 @@ export const SERVICES: Service[] = [
     title: "স্যালাইন ক্যানুলা ও IV সেটআপ",
     titleEn: "Saline & Cannula Setup",
     desc: "ক্যানুলা স্থাপন, স্যালাইন ও IV ফ্লুইড সেটআপ ঘরেই।",
-    price: "মূল্য জানতে যোগাযোগ",
+    price: "৳৩০০ থেকে শুরু",
+    priceNote: "ক্যানুলা ৳৫০০ • ক্যানুলা + স্যালাইন ৳৬০০",
     primary: true,
   },
   {
@@ -72,7 +93,8 @@ export const SERVICES: Service[] = [
     title: "রক্তচাপ, ডায়াবেটিস ও অক্সিজেন পালস চেক",
     titleEn: "Health Vitals Check",
     desc: "প্রেসার, ব্লাড সুগার ও অক্সিজেন স্যাচুরেশন পরীক্ষা।",
-    price: "৳১০০",
+    price: "৳১৫০ থেকে",
+    priceNote: "২টি ৳২০০ • ফুল কম্বো ৳২৫০",
     primary: true,
   },
   {
@@ -99,11 +121,6 @@ export const SERVICES: Service[] = [
   },
 ];
 
-export const INJECTION_PRICES = {
-  "বড় / Adult": { IV: "৳৩০০", IM: "৳৩০০" },
-  "বাচ্চা / Child": { IV: "৳৫০০", IM: "৳৫০০ – ৳৮০০" },
-} as const;
-
 export function waLink(message: string) {
   return `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(message)}`;
 }
@@ -117,14 +134,42 @@ export type Product = {
 };
 
 export const PRODUCTS: Product[] = [
-  { id: "gauze", name: "স্টেরাইল গজ", nameEn: "Sterile Gauze", price: 60, unit: "প্যাক" },
-  { id: "hexisol", name: "হেক্সিসল হ্যান্ড রাব", nameEn: "Hexisol", price: 120, unit: "বোতল" },
-  { id: "bandage", name: "ব্যান্ডেজ রোল", nameEn: "Bandage Roll", price: 80, unit: "পিস" },
-  { id: "micropore", name: "মাইক্রোপোর টেপ", nameEn: "Micro-pore Tape", price: 70, unit: "রোল" },
-  { id: "neb-mask", name: "নেবুলাইজার মাস্ক", nameEn: "Nebulizer Mask", price: 150, unit: "সেট" },
-  { id: "bp-monitor", name: "ডিজিটাল বিপি মনিটর", nameEn: "BP Monitor", price: 2200, unit: "পিস" },
-  { id: "dressing-kit", name: "ড্রেসিং কিট", nameEn: "Dressing Kit", price: 120, unit: "কিট" },
-  { id: "glucometer", name: "গ্লুকোমিটার স্ট্রিপ", nameEn: "Glucometer Strips", price: 650, unit: "বক্স" },
+  { id: "gauze", name: "স্টেরাইল গজ", nameEn: "Sterile Gauze", price: 10, unit: "পিস" },
+  { id: "gauze-pack", name: "স্টেরাইল গজ (প্যাক)", nameEn: "Sterile Gauze Pack", price: 35, unit: "প্যাক" },
+  { id: "bandage", name: "ব্যান্ডেজ", nameEn: "Bandage", price: 10, unit: "পিস" },
+  { id: "roll-bandage-2", name: 'রোল ব্যান্ডেজ ২"', nameEn: 'Roll Bandage 2"', price: 10, unit: "পিস" },
+  { id: "roll-bandage-4", name: 'রোল ব্যান্ডেজ ৪"', nameEn: 'Roll Bandage 4"', price: 15, unit: "পিস" },
+  { id: "roll-bandage-6", name: 'রোল ব্যান্ডেজ ৬"', nameEn: 'Roll Bandage 6"', price: 20, unit: "পিস" },
+  { id: "povisep-30", name: "পভিসেপ ৩০ মি.লি.", nameEn: "Povisep 30ml", price: 55, unit: "বোতল" },
+  { id: "povisep-100", name: "পভিসেপ ১০০ মি.লি.", nameEn: "Povisep 100ml", price: 120, unit: "বোতল" },
+  { id: "hexisol-50", name: "হেক্সিসল ৫০ মি.লি.", nameEn: "Hexisol 50ml", price: 55, unit: "বোতল" },
+  { id: "hexisol-250", name: "হেক্সিসল ২৫০ মি.লি.", nameEn: "Hexisol 250ml", price: 130, unit: "বোতল" },
+  { id: "gloves", name: "সার্জিক্যাল গ্লাভস", nameEn: "Surgical Gloves", price: 20, unit: "জোড়া" },
+  { id: "mask", name: "সার্জিক্যাল মাস্ক", nameEn: "Surgical Mask", price: 10, unit: "পিস" },
+  { id: "micropore", name: 'মাইক্রোপোর টেপ ১"', nameEn: 'Micro-pore Tape 1"', price: 50, unit: "রোল" },
+  { id: "dressing-kit", name: "ডিসপোজেবল ড্রেসিং কিট", nameEn: "Disposable Dressing Kit", price: 90, unit: "কিট" },
+  { id: "catgut", name: "ক্যাটগাট / সুচার থ্রেড", nameEn: "Catgut / Suture Thread", price: 400, unit: "পিস" },
+  { id: "thermo-digital", name: "ডিজিটাল থার্মোমিটার", nameEn: "Digital Thermometer", price: 200, unit: "পিস" },
+  { id: "thermo-analog", name: "অ্যানালগ থার্মোমিটার", nameEn: "Analog Thermometer", price: 100, unit: "পিস" },
+  { id: "bp-monitor", name: "ডিজিটাল বিপি মনিটর", nameEn: "Digital BP Monitor", price: 2200, unit: "ইউনিট" },
+  { id: "gluco-strips", name: "গ্লুকোমিটার স্ট্রিপ (৫০)", nameEn: "Glucometer Strips (50s)", price: 800, unit: "বক্স" },
+  { id: "neb-mask", name: "নেবুলাইজার মাস্ক সেট", nameEn: "Nebulizer Mask Set", price: 120, unit: "সেট" },
+  { id: "windel-plus", name: "উইন্ডেল প্লাস নেবুলাইজার সলিউশন", nameEn: "Windel Plus (Incepta)", price: 150, unit: "প্যাক (৬ অ্যাম্পুল)" },
+  { id: "budicort", name: "বুডিকর্ট ০.২৫ নেবুলাইজার", nameEn: "Budicort 0.25 (Incepta)", price: 25, unit: "অ্যাম্পুল" },
+  { id: "sultolin", name: "সালটোলিন ২০ মি.লি.", nameEn: "Sultolin 20ml (Square)", price: 121, unit: "বোতল" },
+  { id: "iprex", name: "আইপ্রেক্স ২০ মি.লি.", nameEn: "Iprex 20ml (Square)", price: 131, unit: "বোতল" },
 ];
 
-export const DRESSING_KIT_PRICE = 120;
+export const DRESSING_KIT_PRICE = 90;
+
+/** Nurse commission share: 60% base, +1% per 0.1 rating above 4.0 (max 70%). */
+export function nurseSharePct(rating: number) {
+  const bonus = rating > 4 ? Math.round((rating - 4) * 10) : 0;
+  return Math.min(70, 60 + bonus);
+}
+
+export function splitPayout(amount: number, rating: number) {
+  const pct = nurseSharePct(rating);
+  const nurse = Math.round((amount * pct) / 100);
+  return { pct, nurse, platform: amount - nurse };
+}

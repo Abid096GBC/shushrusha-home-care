@@ -310,3 +310,15 @@
 @media (prefers-reduced-motion: reduce) {
   .icon-fx *, .stitch-mark, .pin-ping { animation: none !important; }
 }
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}

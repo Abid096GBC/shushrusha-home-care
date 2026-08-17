@@ -16,7 +16,45 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { BodyDiagram, StitchLine } from "@/components/BodyDiagram";
 import { AnimatedIcon } from "@/components/AnimatedIcon";
-import { BILLING_NOTE, DRESSING_KIT_PRICE, SERVICES } from "@/lib/site";
+import { BILLING_NOTE, DRESSING_KIT_PRICE, PRICES, SERVICES } from "@/lib/site";
+import { searchInjections } from "@/lib/injections";
+
+function MedicineSearch({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [focused, setFocused] = useState(false);
+  const results = searchInjections(value);
+  return (
+    <div className="relative">
+      <Input
+        value={value}
+        maxLength={120}
+        placeholder="টাইপ করুন — যেমন: ax, Ceftron, Meropenem"
+        onFocus={() => setFocused(true)}
+        onBlur={() => window.setTimeout(() => setFocused(false), 150)}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      {focused && results.length > 0 && (
+        <ul className="absolute z-50 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
+          {results.map((r) => (
+            <li key={`${r.brand}-${r.strength}`}>
+              <button
+                type="button"
+                className="w-full px-3 py-2 text-left text-sm hover:bg-secondary"
+                onClick={() => onChange(`${r.brand} ${r.strength}`)}
+              >
+                <span className="font-medium text-foreground">
+                  {r.brand} {r.strength}
+                </span>
+                <span className="block text-xs text-muted-foreground">
+                  {r.generic} • {r.company} • ৳{r.price}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 import { createBooking } from "@/lib/bookings.functions";
 
 type Value = string | number | boolean;
@@ -103,12 +141,7 @@ function stepsFor(id: string): Step[] {
           title: "ইনজেকশন / ওষুধের নাম",
           validate: (s) => (String(s["medicine"] ?? "").trim().length < 2 ? "ওষুধের নাম লিখুন" : null),
           render: (s, set) => (
-            <Input
-              value={String(s["medicine"] ?? "")}
-              maxLength={120}
-              placeholder="যেমন: Ceftriaxone 1gm"
-              onChange={(e) => set({ medicine: e.target.value })}
-            />
+            <MedicineSearch value={String(s["medicine"] ?? "")} onChange={(v) => set({ medicine: v })} />
           ),
         },
         {
@@ -207,15 +240,16 @@ function stepsFor(id: string): Step[] {
     case "saline":
       return [
         {
-          title: "ক্যানুলা প্রয়োজন?",
-          validate: (s) => (s["cannula"] ? null : "একটি অপশন নির্বাচন করুন"),
+          title: "কোন সেবাটি প্রয়োজন?",
+          validate: (s) => (s["saline_mode"] ? null : "একটি অপশন নির্বাচন করুন"),
           render: (s, set) => (
             <Choice
-              value={s["cannula"]}
-              onSelect={(v) => set({ cannula: v })}
+              value={s["saline_mode"]}
+              onSelect={(v) => set({ saline_mode: v })}
               options={[
-                { value: "নতুন ক্যানুলা প্রয়োজন", label: "নতুন ক্যানুলা প্রয়োজন" },
-                { value: "ক্যানুলা আগে থেকেই আছে", label: "ক্যানুলা আগে থেকেই আছে" },
+                { value: "স্যালাইন সেটআপ (ক্যানুলা আছে)", label: "স্যালাইন সেটআপ", hint: "ক্যানুলা আগে থেকেই আছে — ৳৩০০" },
+                { value: "ক্যানুলা ইনসার্শন", label: "শুধু ক্যানুলা ইনসার্শন", hint: "৳৫০০" },
+                { value: "ক্যানুলা + স্যালাইন পুশ", label: "ক্যানুলা + স্যালাইন পুশ", hint: "৳৬০০" },
               ]}
             />
           ),
@@ -231,6 +265,7 @@ function stepsFor(id: string): Step[] {
                 { value: "Normal Saline", label: "Normal Saline (NS)" },
                 { value: "DNS", label: "DNS" },
                 { value: "Cholera Saline", label: "কলেরা স্যালাইন" },
+                { value: "প্রযোজ্য নয়", label: "প্রযোজ্য নয় (শুধু ক্যানুলা)" },
               ]}
             />
           ),
@@ -246,8 +281,9 @@ function stepsFor(id: string): Step[] {
               value={s["mode"]}
               onSelect={(v) => set({ mode: v })}
               options={[
-                { value: "এককালীন ব্যবহার (৳১০০)", label: "এককালীন ব্যবহার", hint: "৳১০০ / বার" },
-                { value: "মেশিন রেন্ট ৭ দিন (৳৫০০)", label: "৭ দিনের জন্য মেশিন রেন্ট", hint: "৳৫০০" },
+                { value: "এক সেশন (ওষুধ ছাড়া)", label: "এক সেশন — ওষুধ ছাড়া", hint: "৳৫০" },
+                { value: "এক সেশন (ওষুধসহ)", label: "এক সেশন — ওষুধসহ", hint: "৳১০০" },
+                { value: "মেশিন রেন্ট ৭ দিন", label: "৭ দিনের মেশিন রেন্ট", hint: "৳৫০০ (ওষুধ আলাদা)" },
               ]}
             />
           ),
@@ -385,35 +421,54 @@ function stepsFor(id: string): Step[] {
   }
 }
 
-function estimate(id: string, s: State): string {
+function bn(n: number) {
+  return `৳${n.toLocaleString("en-US")}`;
+}
+
+function estimate(id: string, s: State): { label: string; amount?: number } {
+  const P = PRICES;
   switch (id) {
     case "injection": {
-      const child = s["category"] === "বাচ্চা / Child";
-      if (!child) return "৳৩০০";
-      return s["route"] === "IM" ? "৳৫০০ – ৳৮০০" : "৳৫০০";
+      const amount = s["category"] === "বাচ্চা / Child" ? P.injectionChild : P.injectionAdult;
+      return { label: bn(amount), amount };
     }
     case "suturing": {
       const n = Number(s["stitch_count"] ?? 0);
-      const base = s["suture_type"] === "সেলাই কাটা / Stitch Removal" ? 300 : 400;
-      return `৳${base + n * 50} (আনুমানিক)`;
+      const rate = s["suture_type"] === "সেলাই কাটা / Stitch Removal" ? P.stitchRemovalPerStitch : P.suturingPerStitch;
+      const amount = n * rate;
+      return { label: `${bn(amount)} (${n} × ${bn(rate)})`, amount };
     }
     case "dressing": {
-      const base = s["severity"] === "বড় / পোড়া ক্ষত (Large)" ? 600 : s["severity"] === "সেলাই ড্রেসিং (Medium)" ? 400 : 300;
-      return `৳${base + (s["dressing_kit"] === true ? DRESSING_KIT_PRICE : 0)}`;
+      const amount = P.dressing + (s["dressing_kit"] === true ? DRESSING_KIT_PRICE : 0);
+      return { label: bn(amount), amount };
     }
-    case "nebulizer":
-      return s["mode"] === "মেশিন রেন্ট ৭ দিন (৳৫০০)" ? "৳৫০০" : "৳১০০";
+    case "nebulizer": {
+      const mode = String(s["mode"] ?? "");
+      const amount = mode.includes("রেন্ট") ? P.nebRent : mode.includes("ওষুধসহ") ? P.nebWithMed : P.nebNoMed;
+      return { label: bn(amount), amount };
+    }
     case "vitals": {
-      return "৳১০০";
+      const n = [s["bp"], s["glucose"], s["spo2"]].filter(Boolean).length;
+      const amount = n >= 3 ? P.vitals3 : n === 2 ? P.vitals2 : P.vitals1;
+      return { label: bn(amount), amount };
     }
-    case "saline":
-      return s["cannula"] === "নতুন ক্যানুলা প্রয়োজন" ? "৳৪০০ (আনুমানিক)" : "৳৩০০ (আনুমানিক)";
+    case "saline": {
+      const mode = String(s["saline_mode"] ?? "");
+      const amount = mode.includes("ক্যানুলা + স্যালাইন")
+        ? P.cannulaSaline
+        : mode.includes("ক্যানুলা")
+          ? P.cannulaOnly
+          : P.salineOnly;
+      return { label: bn(amount), amount };
+    }
     case "translator":
-      return "সম্পূর্ণ ফ্রি";
-    case "product":
-      return `৳${Number(s["unit_price"] ?? 0) * Number(s["qty"] ?? 1)}`;
+      return { label: "সম্পূর্ণ ফ্রি", amount: 0 };
+    case "product": {
+      const amount = Number(s["unit_price"] ?? 0) * Number(s["qty"] ?? 1);
+      return { label: bn(amount), amount };
+    }
     default:
-      return "কাস্টম প্যাকেজ";
+      return { label: "কাস্টম প্যাকেজ" };
   }
 }
 
@@ -448,7 +503,8 @@ export function ServiceWizard({
 
   const custom = stepsFor(serviceId);
   const total = custom.length + 1;
-  const price = estimate(serviceId, state);
+  const est = estimate(serviceId, state);
+  const price = est.label;
 
   function set(patch: State) {
     setState((prev) => ({ ...prev, ...patch }));
@@ -490,6 +546,7 @@ export function ServiceWizard({
           stitch_count: state["stitch_count"] ? Number(state["stitch_count"]) : undefined,
           referral_code: contact.referral.trim() || undefined,
           price_estimate: price,
+          amount: est.amount,
           notes: contact.notes.trim() || undefined,
         },
       });

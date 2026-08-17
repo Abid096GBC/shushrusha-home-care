@@ -103,12 +103,7 @@ function stepsFor(id: string): Step[] {
           title: "ইনজেকশন / ওষুধের নাম",
           validate: (s) => (String(s["medicine"] ?? "").trim().length < 2 ? "ওষুধের নাম লিখুন" : null),
           render: (s, set) => (
-            <Input
-              value={String(s["medicine"] ?? "")}
-              maxLength={120}
-              placeholder="যেমন: Ceftriaxone 1gm"
-              onChange={(e) => set({ medicine: e.target.value })}
-            />
+            <MedicineSearch value={String(s["medicine"] ?? "")} onChange={(v) => set({ medicine: v })} />
           ),
         },
         {

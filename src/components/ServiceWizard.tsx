@@ -207,15 +207,16 @@ function stepsFor(id: string): Step[] {
     case "saline":
       return [
         {
-          title: "ক্যানুলা প্রয়োজন?",
-          validate: (s) => (s["cannula"] ? null : "একটি অপশন নির্বাচন করুন"),
+          title: "কোন সেবাটি প্রয়োজন?",
+          validate: (s) => (s["saline_mode"] ? null : "একটি অপশন নির্বাচন করুন"),
           render: (s, set) => (
             <Choice
-              value={s["cannula"]}
-              onSelect={(v) => set({ cannula: v })}
+              value={s["saline_mode"]}
+              onSelect={(v) => set({ saline_mode: v })}
               options={[
-                { value: "নতুন ক্যানুলা প্রয়োজন", label: "নতুন ক্যানুলা প্রয়োজন" },
-                { value: "ক্যানুলা আগে থেকেই আছে", label: "ক্যানুলা আগে থেকেই আছে" },
+                { value: "স্যালাইন সেটআপ (ক্যানুলা আছে)", label: "স্যালাইন সেটআপ", hint: "ক্যানুলা আগে থেকেই আছে — ৳৩০০" },
+                { value: "ক্যানুলা ইনসার্শন", label: "শুধু ক্যানুলা ইনসার্শন", hint: "৳৫০০" },
+                { value: "ক্যানুলা + স্যালাইন পুশ", label: "ক্যানুলা + স্যালাইন পুশ", hint: "৳৬০০" },
               ]}
             />
           ),
@@ -231,6 +232,7 @@ function stepsFor(id: string): Step[] {
                 { value: "Normal Saline", label: "Normal Saline (NS)" },
                 { value: "DNS", label: "DNS" },
                 { value: "Cholera Saline", label: "কলেরা স্যালাইন" },
+                { value: "প্রযোজ্য নয়", label: "প্রযোজ্য নয় (শুধু ক্যানুলা)" },
               ]}
             />
           ),
@@ -246,8 +248,9 @@ function stepsFor(id: string): Step[] {
               value={s["mode"]}
               onSelect={(v) => set({ mode: v })}
               options={[
-                { value: "এককালীন ব্যবহার (৳১০০)", label: "এককালীন ব্যবহার", hint: "৳১০০ / বার" },
-                { value: "মেশিন রেন্ট ৭ দিন (৳৫০০)", label: "৭ দিনের জন্য মেশিন রেন্ট", hint: "৳৫০০" },
+                { value: "এক সেশন (ওষুধ ছাড়া)", label: "এক সেশন — ওষুধ ছাড়া", hint: "৳৫০" },
+                { value: "এক সেশন (ওষুধসহ)", label: "এক সেশন — ওষুধসহ", hint: "৳১০০" },
+                { value: "মেশিন রেন্ট ৭ দিন", label: "৭ দিনের মেশিন রেন্ট", hint: "৳৫০০ (ওষুধ আলাদা)" },
               ]}
             />
           ),

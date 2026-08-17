@@ -16,7 +16,45 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { BodyDiagram, StitchLine } from "@/components/BodyDiagram";
 import { AnimatedIcon } from "@/components/AnimatedIcon";
-import { BILLING_NOTE, DRESSING_KIT_PRICE, SERVICES } from "@/lib/site";
+import { BILLING_NOTE, DRESSING_KIT_PRICE, PRICES, SERVICES } from "@/lib/site";
+import { searchInjections } from "@/lib/injections";
+
+function MedicineSearch({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [focused, setFocused] = useState(false);
+  const results = searchInjections(value);
+  return (
+    <div className="relative">
+      <Input
+        value={value}
+        maxLength={120}
+        placeholder="টাইপ করুন — যেমন: ax, Ceftron, Meropenem"
+        onFocus={() => setFocused(true)}
+        onBlur={() => window.setTimeout(() => setFocused(false), 150)}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      {focused && results.length > 0 && (
+        <ul className="absolute z-50 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
+          {results.map((r) => (
+            <li key={`${r.brand}-${r.strength}`}>
+              <button
+                type="button"
+                className="w-full px-3 py-2 text-left text-sm hover:bg-secondary"
+                onClick={() => onChange(`${r.brand} ${r.strength}`)}
+              >
+                <span className="font-medium text-foreground">
+                  {r.brand} {r.strength}
+                </span>
+                <span className="block text-xs text-muted-foreground">
+                  {r.generic} • {r.company} • ৳{r.price}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 import { createBooking } from "@/lib/bookings.functions";
 
 type Value = string | number | boolean;

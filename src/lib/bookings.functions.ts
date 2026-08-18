@@ -15,6 +15,10 @@ const bookingSchema = z.object({
   price_estimate: z.string().trim().max(80).optional(),
   amount: z.number().min(0).max(100000).optional(),
   notes: z.string().trim().max(600).optional(),
+  time_slot: z.string().trim().max(60).optional(),
+  payment_method: z.enum(["Cash", "bKash"]).optional(),
+  promo_code: z.string().trim().max(40).optional(),
+  discount: z.number().min(0).max(100000).optional(),
 });
 
 export type BookingInput = z.input<typeof bookingSchema>;
@@ -26,6 +30,10 @@ export const createBooking = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { makeTrackingId } = await import("@/lib/admin-auth.server");
+    const { serviceTier } = await import("@/lib/booking-types");
+    const amount = data.amount ?? null;
+    const discount = data.discount ?? 0;
+    const total = amount === null ? null : Math.max(0, amount - discount);
     const { data: row, error } = await supabaseAdmin
       .from("bookings")
       .insert({
@@ -39,14 +47,46 @@ export const createBooking = createServerFn({ method: "POST" })
         stitch_count: data.stitch_count ?? null,
         referral_code: data.referral_code || null,
         price_estimate: data.price_estimate ?? null,
-        amount: data.amount ?? null,
+        amount,
         notes: data.notes ?? null,
+        time_slot: data.time_slot ?? null,
+        payment_method: data.payment_method ?? null,
+        promo_code: data.promo_code || null,
+        discount,
+        total,
+        tier: serviceTier(data.service),
       })
       .select("tracking_id")
       .single();
     if (error) throw new Error(error.message);
+
+    await supabaseAdmin
+      .from("leads")
+      .upsert(
+        {
+          phone: data.phone,
+          name: data.customer_name,
+          source: "booking",
+          last_service: data.service,
+        },
+        { onConflict: "phone" },
+      );
+    if (data.promo_code) {
+      const { data: promo } = await supabaseAdmin
+        .from("promo_codes")
+        .select("id, used_count")
+        .eq("code", data.promo_code.toUpperCase())
+        .maybeSingle();
+      if (promo) {
+        await supabaseAdmin
+          .from("promo_codes")
+          .update({ used_count: (promo.used_count ?? 0) + 1 })
+          .eq("id", promo.id);
+      }
+    }
     return { trackingId: row.tracking_id as string };
   });
+
 
 export const trackBooking = createServerFn({ method: "POST" })
   .inputValidator((data: { trackingId: string }) =>

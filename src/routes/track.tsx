@@ -61,7 +61,12 @@ function TrackPage() {
 
   async function sendRating() {
     if (!res || stars < 1) return;
-    await rate({ data: { trackingId: res.trackingId, rating: stars, review: review.trim() || undefined } });
+    const body: { trackingId: string; rating: number; review?: string } = {
+      trackingId: res.trackingId,
+      rating: stars,
+    };
+    if (review.trim()) body.review = review.trim();
+    await rate({ data: body });
     setRated(true);
   }
 

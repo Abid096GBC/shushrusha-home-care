@@ -56,6 +56,7 @@ function MedicineSearch({ value, onChange }: { value: string; onChange: (v: stri
   );
 }
 import { createBooking } from "@/lib/bookings.functions";
+import { validatePromo } from "@/lib/customer.functions";
 
 type Value = string | number | boolean;
 type State = Record<string, Value>;
@@ -492,6 +493,7 @@ export function ServiceWizard({
   const service = SERVICES.find((s) => s.id === serviceId);
   const serviceLabel = extraTitle ?? `${service?.title ?? serviceId} (${service?.titleEn ?? ""})`.trim();
   const submit = useServerFn(createBooking);
+  const checkPromo = useServerFn(validatePromo);
 
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
@@ -500,6 +502,10 @@ export function ServiceWizard({
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [tracking, setTracking] = useState("");
+  const [slot, setSlot] = useState("");
+  const [pay, setPay] = useState<"Cash" | "bKash">("Cash");
+  const [discount, setDiscount] = useState(0);
+  const [promoMsg, setPromoMsg] = useState("");
 
   const custom = stepsFor(serviceId);
   const total = custom.length + 1;
@@ -518,6 +524,24 @@ export function ServiceWizard({
     setError("");
     setTracking("");
     setBusy(false);
+    setSlot("");
+    setPay("Cash");
+    setDiscount(0);
+    setPromoMsg("");
+  }
+
+  async function applyPromo() {
+    const code = contact.referral.trim();
+    const subtotal = est.amount ?? 0;
+    if (!code || subtotal <= 0) return;
+    const res = await checkPromo({ data: { code, subtotal } });
+    if (res.ok) {
+      setDiscount(res.discount);
+      setPromoMsg(`✅ ${res.label} প্রয়োগ হয়েছে`);
+    } else {
+      setDiscount(0);
+      setPromoMsg(`⚠️ ${res.message}`);
+    }
   }
 
   async function finish() {
@@ -548,6 +572,10 @@ export function ServiceWizard({
           price_estimate: price,
           amount: est.amount,
           notes: contact.notes.trim() || undefined,
+          time_slot: slot.trim() || undefined,
+          payment_method: pay,
+          promo_code: contact.referral.trim() || undefined,
+          discount,
         },
       });
       setTracking(res.trackingId);
@@ -688,9 +716,60 @@ export function ServiceWizard({
                 </div>
               )}
 
-              <div className="flex items-center justify-between rounded-xl border border-primary/20 bg-secondary px-4 py-3">
-                <span className="text-sm text-muted-foreground">আনুমানিক মূল্য</span>
-                <span className="text-lg font-bold text-primary">{price}</span>
+              {step === custom.length && (
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="w-slot">পছন্দের সময়</Label>
+                    <Input
+                      id="w-slot"
+                      className="mt-1.5"
+                      maxLength={60}
+                      value={slot}
+                      placeholder="যেমন: আজ রাত ৮টা / আগামীকাল সকাল ১০টা"
+                      onChange={(e) => setSlot(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>পেমেন্ট পদ্ধতি</Label>
+                    <div className="mt-1.5 grid grid-cols-2 gap-2">
+                      {(["Cash", "bKash"] as const).map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => setPay(m)}
+                          className={chip(pay === m)}
+                        >
+                          {m === "Cash" ? "ক্যাশ (সার্ভিসের পর)" : "বিকাশ"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {contact.referral.trim() && (
+                    <Button type="button" variant="softOutline" className="w-full" onClick={applyPromo}>
+                      প্রমো কোড যাচাই করুন
+                    </Button>
+                  )}
+                  {promoMsg && <p className="text-xs text-muted-foreground">{promoMsg}</p>}
+                </div>
+              )}
+
+              <div className="rounded-xl border border-primary/20 bg-secondary px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">আনুমানিক মূল্য</span>
+                  <span className="text-sm font-medium text-foreground">{price}</span>
+                </div>
+                {discount > 0 && (
+                  <div className="mt-1 flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">ছাড়</span>
+                    <span className="font-medium text-accent">−৳{discount}</span>
+                  </div>
+                )}
+                <div className="mt-1 flex items-center justify-between border-t border-primary/15 pt-1">
+                  <span className="text-sm text-muted-foreground">সর্বমোট</span>
+                  <span className="text-lg font-bold text-primary">
+                    {est.amount === undefined ? price : `৳${Math.max(0, (est.amount ?? 0) - discount)}`}
+                  </span>
+                </div>
               </div>
 
               {error && <p className="text-sm text-destructive">{error}</p>}

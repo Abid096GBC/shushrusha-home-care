@@ -93,18 +93,24 @@ export const workerAction = createServerFn({ method: "POST" })
 
     const amount = Number(booking.total ?? booking.amount ?? 0);
     const split = splitPayout(amount, Number(worker.rating));
-    const patch: Record<string, unknown> = {};
+    const patch: {
+      nurse_id?: string;
+      status?: string;
+      nurse_share?: number;
+      platform_share?: number;
+      payment_status?: string;
+    } = {};
 
     if (data.action === "accept") {
-      patch["nurse_id"] = worker.id;
-      patch["status"] = "Nurse Assigned";
-      patch["nurse_share"] = split.nurse;
-      patch["platform_share"] = split.platform;
-    } else if (data.action === "transit") patch["status"] = "In Transit";
-    else if (data.action === "active") patch["status"] = "Service Active";
-    else if (data.action === "payment") patch["payment_status"] = data.payment ?? "Cash Collected by Nurse";
+      patch.nurse_id = worker.id;
+      patch.status = "Nurse Assigned";
+      patch.nurse_share = split.nurse;
+      patch.platform_share = split.platform;
+    } else if (data.action === "transit") patch.status = "In Transit";
+    else if (data.action === "active") patch.status = "Service Active";
+    else if (data.action === "payment") patch.payment_status = data.payment ?? "Cash Collected by Nurse";
     else if (data.action === "complete") {
-      patch["status"] = "Completed";
+      patch.status = "Completed";
       await supabaseAdmin
         .from("nurses")
         .update({ completed_visits: (worker.completed_visits ?? 0) + 1 })

@@ -5,12 +5,12 @@ import { SITE, waLink } from "@/lib/site";
 import { TrackOrder } from "@/components/TrackOrder";
 
 const LINKS = [
-  { href: "#home", label: "হোম" },
-  { href: "#services", label: "সেবাসমূহ" },
-  { href: "#store", label: "স্টোর" },
-  { href: "#packages", label: "ফ্রি গাইডেন্স" },
-  { href: "#about", label: "আমাদের সম্পর্কে" },
-  { href: "#contact", label: "যোগাযোগ" },
+  { href: "/", label: "হোম" },
+  { href: "/#services", label: "সেবাসমূহ" },
+  { href: "/store", label: "সার্জিক্যাল স্টোর" },
+  { href: "/track", label: "অর্ডার ট্র্যাকিং" },
+  { href: "/#contact", label: "যোগাযোগ" },
+  { href: "/worker", label: "নার্স পোর্টাল" },
 ];
 
 export function Navbar() {
@@ -19,7 +19,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-md">
       <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-        <a href="#home" className="flex items-center gap-2">
+        <a href="/" className="flex items-center gap-2">
           <span className="gradient-primary flex size-9 items-center justify-center rounded-xl text-primary-foreground shadow-glow">
             <HeartPulse className="size-5" />
           </span>

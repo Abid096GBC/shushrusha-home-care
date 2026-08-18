@@ -97,7 +97,7 @@ export const trackBooking = createServerFn({ method: "POST" })
     const id = data.trackingId.replace(/^#/, "").toUpperCase();
     const { data: row } = await supabaseAdmin
       .from("bookings")
-      .select("tracking_id, service, status, created_at, price_estimate, nurse_id")
+      .select("tracking_id, service, status, created_at, price_estimate, nurse_id, rating, review, total, payment_status")
       .eq("tracking_id", id)
       .maybeSingle();
     if (!row) return null;
@@ -116,6 +116,10 @@ export const trackBooking = createServerFn({ method: "POST" })
       status: row.status as string,
       price: (row.price_estimate as string | null) ?? "",
       createdAt: row.created_at as string,
+      rating: (row.rating as number | null) ?? null,
+      review: (row.review as string | null) ?? null,
+      total: (row.total as number | null) ?? null,
+      paymentStatus: row.payment_status as string,
       nurse,
     };
   });

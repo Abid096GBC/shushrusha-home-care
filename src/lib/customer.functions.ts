@@ -157,3 +157,17 @@ export const placeStoreOrder = createServerFn({ method: "POST" })
       );
     return { trackingId: row.tracking_id as string, subtotal, discount, total };
   });
+
+/** Live nebulizer machine availability for the rental option. */
+export const nebulizerAvailability = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { NEB_MACHINE_STOCK } = await import("@/lib/site");
+  const { count } = await supabaseAdmin
+    .from("bookings")
+    .select("id", { count: "exact", head: true })
+    .ilike("service", "%নেবুলাইজার%")
+    .neq("status", "Completed")
+    .gte("created_at", new Date(Date.now() - 7 * 864e5).toISOString());
+  const busy = Math.min(NEB_MACHINE_STOCK, count ?? 0);
+  return { total: NEB_MACHINE_STOCK, available: Math.max(0, NEB_MACHINE_STOCK - busy) };
+});

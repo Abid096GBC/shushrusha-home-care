@@ -204,6 +204,7 @@ export type Database = {
           name: string
           nurse_code: string
           phone: string
+          photo_url: string | null
           rating: number
           specialties: string[]
           status: string
@@ -220,6 +221,7 @@ export type Database = {
           name: string
           nurse_code: string
           phone: string
+          photo_url?: string | null
           rating?: number
           specialties?: string[]
           status?: string
@@ -236,6 +238,7 @@ export type Database = {
           name?: string
           nurse_code?: string
           phone?: string
+          photo_url?: string | null
           rating?: number
           specialties?: string[]
           status?: string

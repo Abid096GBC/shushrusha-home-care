@@ -267,7 +267,57 @@ function stepsFor(id: string): Step[] {
             />
           ),
         },
+        {
+          title: "ডোজ নির্বাচন",
+          validate: (s) =>
+            s["dose"] && Number(s["dose_count"] ?? 0) > 0 ? null : "ডোজ ও ডোজ সংখ্যা নির্বাচন করুন",
+          render: (s, set) => (
+            <div className="space-y-4">
+              <Choice
+                value={s["dose"]}
+                onSelect={(v) => set({ dose: v })}
+                options={[
+                  { value: "250 mg", label: "250 mg" },
+                  { value: "500 mg", label: "500 mg" },
+                  { value: "1 gm", label: "1 gm" },
+                  { value: "2 gm", label: "2 gm" },
+                  { value: "কাস্টম ডোজ", label: "অন্যান্য / কাস্টম ডোজ" },
+                ]}
+              />
+              {s["dose"] === "কাস্টম ডোজ" && (
+                <Input
+                  value={String(s["dose_custom"] ?? "")}
+                  maxLength={40}
+                  placeholder="ডোজ লিখুন — যেমন: 40 mg / 1.5 gm"
+                  onChange={(e) => set({ dose_custom: e.target.value })}
+                />
+              )}
+              <div>
+                <Label>মোট কতটি ডোজ?</Label>
+                <div className="mt-2">
+                  <Counter
+                    value={Number(s["dose_count"] ?? 1)}
+                    onChange={(n) => set({ dose_count: Math.max(1, n) })}
+                  />
+                </div>
+              </div>
+            </div>
+          ),
+        },
+        {
+          title: "ডোজের সময় (স্প্লিট টাইম স্লট)",
+          validate: (s) =>
+            String(s["split_slots"] ?? "").trim() ? null : "কমপক্ষে একটি সময় স্লট যোগ করুন",
+          render: (s, set) => (
+            <SlotPicker
+              state={s}
+              set={set}
+              label="প্রতিটি ডোজের জন্য আলাদা সময় দিন — নার্স সেই অনুযায়ী ভিজিট করবেন।"
+            />
+          ),
+        },
       ];
+
     case "suturing":
       return [
         {

@@ -28,9 +28,9 @@ export const PRICES = {
   nebNoMed: 50,
   nebWithMed: 100,
   nebRent: 500,
-  vitals1: 150,
-  vitals2: 200,
-  vitals3: 250,
+  vitals1: 100,
+  vitals2: 150,
+  vitals3: 200,
 };
 
 export type Service = {
@@ -85,7 +85,7 @@ export const SERVICES: Service[] = [
     titleEn: "Saline & Cannula Setup",
     desc: "ক্যানুলা স্থাপন, স্যালাইন ও IV ফ্লুইড সেটআপ ঘরেই।",
     price: "৳৩০০ থেকে শুরু",
-    priceNote: "ক্যানুলা ৳৫০০ • ক্যানুলা + স্যালাইন ৳৬০০",
+    priceNote: "স্যালাইন সেটআপ ৳৩০০ • ক্যানুলা + স্যালাইন ৳৬০০",
     primary: true,
   },
   {
@@ -93,8 +93,8 @@ export const SERVICES: Service[] = [
     title: "রক্তচাপ, ডায়াবেটিস ও অক্সিজেন পালস চেক",
     titleEn: "Health Vitals Check",
     desc: "প্রেসার, ব্লাড সুগার ও অক্সিজেন স্যাচুরেশন পরীক্ষা।",
-    price: "৳১৫০ থেকে",
-    priceNote: "২টি ৳২০০ • ফুল কম্বো ৳২৫০",
+    price: "৳১০০ থেকে",
+    priceNote: "২টি ৳১৫০ • ফুল কম্বো ৳২০০",
     primary: true,
   },
   {
@@ -161,6 +161,9 @@ export const PRODUCTS: Product[] = [
 ];
 
 export const DRESSING_KIT_PRICE = 90;
+
+/** Total nebulizer machines owned by Shushrusha (used for the availability indicator). */
+export const NEB_MACHINE_STOCK = 6;
 
 /** Nurse commission share: 60% base, +1% per 0.1 rating above 4.0 (max 70%). */
 export function nurseSharePct(rating: number) {

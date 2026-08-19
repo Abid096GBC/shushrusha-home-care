@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { CheckCircle2, Copy, Loader2 } from "lucide-react";
@@ -56,7 +56,7 @@ function MedicineSearch({ value, onChange }: { value: string; onChange: (v: stri
   );
 }
 import { createBooking } from "@/lib/bookings.functions";
-import { validatePromo } from "@/lib/customer.functions";
+import { nebulizerAvailability, validatePromo } from "@/lib/customer.functions";
 
 type Value = string | number | boolean;
 type State = Record<string, Value>;

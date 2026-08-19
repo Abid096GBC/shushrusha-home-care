@@ -134,6 +134,100 @@ function Counter({ value, onChange }: { value: number; onChange: (n: number) => 
   );
 }
 
+/** Split time slots — customers can book several broken slots (e.g. one per dose/session). */
+function SlotPicker({
+  state,
+  set,
+  label,
+}: {
+  state: State;
+  set: (p: State) => void;
+  label: string;
+}) {
+  const raw = String(state["split_slots"] ?? "");
+  const slots = raw ? raw.split(" | ") : [];
+  const [draft, setDraft] = useState("");
+  const save = (list: string[]) => set({ split_slots: list.join(" | ") });
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <div className="flex gap-2">
+        <Input
+          value={draft}
+          maxLength={40}
+          placeholder="যেমন: আজ সকাল ৯টা"
+          onChange={(e) => setDraft(e.target.value)}
+        />
+        <Button
+          type="button"
+          variant="softOutline"
+          onClick={() => {
+            if (!draft.trim()) return;
+            save([...slots, draft.trim()]);
+            setDraft("");
+          }}
+        >
+          যোগ
+        </Button>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {["আজ সকাল ৮টা", "আজ দুপুর ২টা", "আজ সন্ধ্যা ৭টা", "আজ রাত ১০টা", "আগামীকাল সকাল ৯টা"].map((q) => (
+          <button
+            key={q}
+            type="button"
+            className="rounded-full border border-border px-3 py-1 text-xs hover:bg-secondary"
+            onClick={() => !slots.includes(q) && save([...slots, q])}
+          >
+            + {q}
+          </button>
+        ))}
+      </div>
+      {slots.length > 0 && (
+        <ul className="space-y-2">
+          {slots.map((s, i) => (
+            <li
+              key={`${s}-${i}`}
+              className="flex items-center justify-between rounded-xl border border-primary/25 bg-secondary px-3 py-2 text-sm"
+            >
+              <span className="font-medium text-primary">
+                স্লট {i + 1}: {s}
+              </span>
+              <button
+                type="button"
+                className="text-xs text-destructive"
+                onClick={() => save(slots.filter((_, idx) => idx !== i))}
+              >
+                মুছুন
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function NebAvailability() {
+  const load = useServerFn(nebulizerAvailability);
+  const [info, setInfo] = useState<{ total: number; available: number } | null>(null);
+  useEffect(() => {
+    void load({}).then(setInfo).catch(() => setInfo(null));
+  }, [load]);
+  if (!info) return null;
+  const ok = info.available > 0;
+  return (
+    <div
+      className={`mt-3 flex items-center gap-2 rounded-xl border px-3 py-2 text-sm ${
+        ok ? "border-accent/40 bg-accent/10 text-accent-foreground" : "border-destructive/40 bg-destructive/10 text-destructive"
+      }`}
+    >
+      <span className={`size-2 rounded-full ${ok ? "animate-pulse bg-accent" : "bg-destructive"}`} />
+      {ok ? `${info.available} টি মেশিন এখন available (মোট ${info.total})` : "এই মুহূর্তে সব মেশিন ভাড়ায় আছে — ওয়েটলিস্টে যুক্ত হবেন"}
+    </div>
+  );
+}
+
+
 function stepsFor(id: string): Step[] {
   switch (id) {
     case "injection":

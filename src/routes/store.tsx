@@ -150,7 +150,8 @@ function StorePage() {
                             onError={(e) => {
                               const el = e.currentTarget;
                               el.style.display = "none";
-                              el.parentElement?.querySelector("[data-fallback]")?.classList.remove("hidden");
+                              const fb = el.parentElement?.querySelector<HTMLElement>("[data-fallback]");
+                              if (fb) fb.style.display = "flex";
                             }}
                           />
                         ) : (
@@ -161,7 +162,8 @@ function StorePage() {
                         {p.image_url && (
                           <div
                             data-fallback
-                            className="hidden h-36 w-full items-center justify-center bg-secondary text-primary"
+                            style={{ display: "none" }}
+                            className="h-36 w-full items-center justify-center bg-secondary text-primary"
                           >
                             <ShoppingCart className="size-8" />
                           </div>

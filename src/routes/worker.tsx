@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { BadgeCheck, Loader2, LockKeyhole, RefreshCw, Star, Wallet } from "lucide-react";
+import { BadgeCheck, Loader2, LockKeyhole, QrCode, RefreshCw, Star, Wallet, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,6 +45,82 @@ function beep() {
   }
 }
 
+/** Live camera QR scanner — nurse must scan the patient QR to complete a visit. */
+function QrScanner({ onResult, onClose }: { onResult: (text: string) => void; onClose: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [err, setErr] = useState("");
+  const [manual, setManual] = useState("");
+
+  useEffect(() => {
+    let stream: MediaStream | null = null;
+    let raf = 0;
+    let stopped = false;
+    const canvas = document.createElement("canvas");
+
+    void (async () => {
+      try {
+        const jsQR = (await import("jsqr")).default;
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        const video = videoRef.current;
+        if (!video) return;
+        video.srcObject = stream;
+        await video.play();
+        const tick = () => {
+          if (stopped) return;
+          if (video.videoWidth) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              const code = jsQR(img.data, img.width, img.height);
+              if (code?.data) {
+                stopped = true;
+                onResult(code.data);
+                return;
+              }
+            }
+          }
+          raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+      } catch {
+        setErr("ক্যামেরা চালু করা যায়নি — নিচে ট্র্যাকিং আইডি লিখে ভেরিফাই করুন।");
+      }
+    })();
+
+    return () => {
+      stopped = true;
+      cancelAnimationFrame(raf);
+      stream?.getTracks().forEach((t) => t.stop());
+    };
+  }, [onResult]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      <div className="card-elevated w-full max-w-sm p-5">
+        <div className="flex items-center justify-between">
+          <h3 className="flex items-center gap-2 font-bold text-foreground">
+            <QrCode className="size-5 text-primary" /> পেশেন্ট QR স্ক্যান
+          </h3>
+          <button type="button" aria-label="বন্ধ" onClick={onClose}>
+            <X className="size-5 text-muted-foreground" />
+          </button>
+        </div>
+        <video ref={videoRef} muted playsInline className="mt-3 aspect-square w-full rounded-xl bg-muted object-cover" />
+        {err && <p className="mt-2 text-xs text-destructive">{err}</p>}
+        <div className="mt-3 flex gap-2">
+          <Input value={manual} placeholder="#SHU-0000" maxLength={30} onChange={(e) => setManual(e.target.value)} />
+          <Button variant="softOutline" onClick={() => manual.trim() && onResult(manual.trim())}>
+            ভেরিফাই
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function WorkerPage() {
   const feedFn = useServerFn(workerFeed);
   const actFn = useServerFn(workerAction);
@@ -56,6 +132,8 @@ function WorkerPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const openCount = useRef(0);
+  const [scanFor, setScanFor] = useState<BookingRow | null>(null);
+  const [scanMsg, setScanMsg] = useState("");
 
   const load = useCallback(
     async (c: string, p: string, silent = false) => {
@@ -81,16 +159,36 @@ function WorkerPage() {
     return () => window.clearInterval(t);
   }, [feed, code, pin, load]);
 
-  async function act(b: BookingRow, action: "accept" | "transit" | "active" | "payment" | "complete", payment?: string) {
-    const body: { code: string; pin: string; bookingId: string; action: typeof action; payment?: string } = {
-      code,
-      pin,
-      bookingId: b.id,
-      action,
-    };
+  async function act(
+    b: BookingRow,
+    action: "accept" | "transit" | "active" | "payment" | "complete",
+    payment?: string,
+    qr?: string,
+  ) {
+    const body: {
+      code: string;
+      pin: string;
+      bookingId: string;
+      action: typeof action;
+      payment?: string;
+      qr?: string;
+    } = { code, pin, bookingId: b.id, action };
     if (payment) body.payment = payment;
+    if (qr) body.qr = qr;
     await actFn({ data: body });
     await load(code, pin, true);
+  }
+
+  async function completeWithQr(text: string) {
+    const b = scanFor;
+    if (!b) return;
+    try {
+      await act(b, "complete", undefined, text);
+      setScanFor(null);
+      setScanMsg("");
+    } catch {
+      setScanMsg("QR মিলছে না — সঠিক রোগীর QR স্ক্যান করুন।");
+    }
   }
 
   if (!feed) {
@@ -238,8 +336,8 @@ function WorkerPage() {
                     <Button size="sm" variant="softOutline" onClick={() => void act(b, "payment", "Paid via bKash")}>
                       বিকাশে পেমেন্ট
                     </Button>
-                    <Button size="sm" variant="hero" onClick={() => void act(b, "complete")}>
-                      সেবা সম্পন্ন
+                    <Button size="sm" variant="hero" onClick={() => { setScanMsg(""); setScanFor(b); }}>
+                      <QrCode /> QR স্ক্যান করে সম্পন্ন
                     </Button>
                   </div>
                 )}
@@ -269,6 +367,16 @@ function WorkerPage() {
           </div>
         </section>
       </main>
+      {scanFor && (
+        <>
+          <QrScanner onResult={(t) => void completeWithQr(t)} onClose={() => setScanFor(null)} />
+          {scanMsg && (
+            <p className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 rounded-full bg-destructive px-4 py-2 text-sm text-destructive-foreground">
+              {scanMsg}
+            </p>
+          )}
+        </>
+      )}
     </div>
   );
 }

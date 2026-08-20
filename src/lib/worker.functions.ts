@@ -73,7 +73,7 @@ export const workerFeed = createServerFn({ method: "POST" })
 
 export const workerAction = createServerFn({ method: "POST" })
   .inputValidator(
-    (data: { code: string; pin: string; bookingId: string; action: string; payment?: string }) =>
+    (data: { code: string; pin: string; bookingId: string; action: string; payment?: string; qr?: string }) =>
       z
         .object({
           code: cred.shape.code,
@@ -81,6 +81,7 @@ export const workerAction = createServerFn({ method: "POST" })
           bookingId: z.string().uuid(),
           action: z.enum(["accept", "transit", "active", "payment", "complete"]),
           payment: z.enum(["Paid via bKash", "Cash Collected by Nurse"]).optional(),
+          qr: z.string().trim().max(120).optional(),
         })
         .parse(data),
   )
@@ -110,6 +111,10 @@ export const workerAction = createServerFn({ method: "POST" })
     else if (data.action === "active") patch.status = "Service Active";
     else if (data.action === "payment") patch.payment_status = data.payment ?? "Cash Collected by Nurse";
     else if (data.action === "complete") {
+      const scanned = (data.qr ?? "").replace(/^SHUSHRUSHA:/i, "").replace(/^#/, "").trim().toUpperCase();
+      if (!scanned) throw new Error("QR_REQUIRED");
+      if (scanned !== String(booking.tracking_id).replace(/^#/, "").trim().toUpperCase())
+        throw new Error("QR_MISMATCH");
       patch.status = "Completed";
       await supabaseAdmin
         .from("nurses")

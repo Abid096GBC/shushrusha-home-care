@@ -633,8 +633,10 @@ function estimate(id: string, s: State): { label: string; amount?: number } {
   const P = PRICES;
   switch (id) {
     case "injection": {
-      const amount = s["category"] === "বাচ্চা / Child" ? P.injectionChild : P.injectionAdult;
-      return { label: bn(amount), amount };
+      const per = s["category"] === "বাচ্চা / Child" ? P.injectionChild : P.injectionAdult;
+      const doses = Math.max(1, Number(s["dose_count"] ?? 1));
+      const amount = per * doses;
+      return { label: doses > 1 ? `${bn(amount)} (${doses} × ${bn(per)})` : bn(amount), amount };
     }
     case "suturing": {
       const n = Number(s["stitch_count"] ?? 0);
@@ -658,12 +660,10 @@ function estimate(id: string, s: State): { label: string; amount?: number } {
     }
     case "saline": {
       const mode = String(s["saline_mode"] ?? "");
-      const amount = mode.includes("ক্যানুলা + স্যালাইন")
-        ? P.cannulaSaline
-        : mode.includes("ক্যানুলা")
-          ? P.cannulaOnly
-          : P.salineOnly;
-      return { label: bn(amount), amount };
+      const per = mode.includes("ক্যানুলা + স্যালাইন") ? P.cannulaSaline : P.salineOnly;
+      const bags = Math.max(1, Number(s["bag_count"] ?? 1));
+      const amount = per * bags;
+      return { label: bags > 1 ? `${bn(amount)} (${bags} × ${bn(per)})` : bn(amount), amount };
     }
     case "translator":
       return { label: "সম্পূর্ণ ফ্রি", amount: 0 };

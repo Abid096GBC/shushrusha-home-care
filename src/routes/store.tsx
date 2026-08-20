@@ -9,6 +9,7 @@ import { WhatsAppFab } from "@/components/WhatsAppFab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { listStore, placeStoreOrder, validatePromo } from "@/lib/customer.functions";
 import { netPrice, type CatalogRow } from "@/lib/booking-types";
 import { BILLING_NOTE } from "@/lib/site";
@@ -39,6 +40,7 @@ function StorePage() {
   const items = useMemo(() => (data?.items ?? []) as CatalogRow[], [data]);
 
   const [cart, setCart] = useState<Record<string, number>>({});
+  const [cartOpen, setCartOpen] = useState(false);
   const [promo, setPromo] = useState("");
   const [discount, setDiscount] = useState(0);
   const [promoMsg, setPromoMsg] = useState("");
@@ -53,6 +55,7 @@ function StorePage() {
     .map((i) => ({ item: i, qty: cart[i.id] ?? 0, unit: netPrice(Number(i.price), Number(i.discount_pct)) }));
   const subtotal = lines.reduce((s, l) => s + l.unit * l.qty, 0);
   const total = Math.max(0, subtotal - discount);
+  const count = lines.reduce((n, l) => n + l.qty, 0);
 
   function add(id: string, delta: number) {
     setCart((c) => {
@@ -64,6 +67,7 @@ function StorePage() {
     });
     setDiscount(0);
     setPromoMsg("");
+    if (delta > 0) setCartOpen(true);
   }
 
   async function applyPromo() {
@@ -123,7 +127,7 @@ function StorePage() {
             </Button>
           </div>
         ) : (
-          <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_340px]">
+          <div className="mt-8">
             <div>
               {isLoading ? (
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -136,18 +140,33 @@ function StorePage() {
                     const net = netPrice(Number(p.price), Number(p.discount_pct));
                     return (
                       <article key={p.id} className="card-elevated flex flex-col overflow-hidden">
+                        <div className="relative">
                         {p.image_url ? (
                           <img
                             src={p.image_url}
                             alt={p.name}
                             loading="lazy"
                             className="h-36 w-full bg-secondary object-cover"
+                            onError={(e) => {
+                              const el = e.currentTarget;
+                              el.style.display = "none";
+                              el.parentElement?.querySelector("[data-fallback]")?.classList.remove("hidden");
+                            }}
                           />
                         ) : (
                           <div className="flex h-36 w-full items-center justify-center bg-secondary text-primary">
                             <ShoppingCart className="size-8" />
                           </div>
                         )}
+                        {p.image_url && (
+                          <div
+                            data-fallback
+                            className="hidden h-36 w-full items-center justify-center bg-secondary text-primary"
+                          >
+                            <ShoppingCart className="size-8" />
+                          </div>
+                        )}
+                        </div>
                         <div className="flex flex-1 flex-col p-4">
                           <div className="flex items-start justify-between gap-2">
                             <h2 className="text-sm font-semibold text-foreground">{p.name}</h2>
@@ -190,10 +209,28 @@ function StorePage() {
               )}
             </div>
 
-            <aside className="card-elevated h-fit p-5 lg:sticky lg:top-24">
-              <h2 className="flex items-center gap-2 text-lg font-bold text-foreground">
-                <ShoppingCart className="size-5 text-primary" /> আপনার কার্ট
-              </h2>
+            <Sheet open={cartOpen} onOpenChange={setCartOpen}>
+              <SheetTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="কার্ট খুলুন"
+                  className="fixed bottom-24 right-5 z-40 flex items-center gap-2 rounded-full bg-primary px-5 py-3 font-semibold text-primary-foreground shadow-lg transition hover:scale-105"
+                >
+                  <ShoppingCart className="size-5" />
+                  কার্ট
+                  {count > 0 && (
+                    <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-bold text-accent-foreground">
+                      {count}
+                    </span>
+                  )}
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
+              <SheetHeader>
+                <SheetTitle className="flex items-center gap-2 text-lg font-bold text-foreground">
+                  <ShoppingCart className="size-5 text-primary" /> আপনার কার্ট
+                </SheetTitle>
+              </SheetHeader>
               {lines.length === 0 ? (
                 <p className="mt-3 text-sm text-muted-foreground">কার্ট খালি আছে।</p>
               ) : (
@@ -262,7 +299,8 @@ function StorePage() {
               <Button className="mt-3 w-full" variant="hero" disabled={busy} onClick={checkout}>
                 {busy && <Loader2 className="animate-spin" />} অর্ডার কনফার্ম করুন
               </Button>
-            </aside>
+              </SheetContent>
+            </Sheet>
           </div>
         )}
       </main>

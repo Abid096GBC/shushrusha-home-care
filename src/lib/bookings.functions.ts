@@ -247,7 +247,7 @@ const nurseSchema = z.object({
   tier: z.enum(["nurse", "worker"]).default("nurse"),
   login_pin: z.string().trim().min(4).max(8).default("1234"),
   active: z.boolean().default(true),
-  photo_url: z.string().trim().max(600).optional(),
+  photo_url: z.string().trim().max(3_000_000).optional(),
 });
 
 export const adminSaveNurse = createServerFn({ method: "POST" })

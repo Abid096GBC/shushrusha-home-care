@@ -244,6 +244,10 @@ const nurseSchema = z.object({
   status: z.enum(NURSE_STATUSES),
   area: z.string().trim().max(80).optional(),
   specialties: z.array(z.string().trim().max(30)).max(12).default([]),
+  tier: z.enum(["nurse", "worker"]).default("nurse"),
+  login_pin: z.string().trim().min(4).max(8).default("1234"),
+  active: z.boolean().default(true),
+  photo_url: z.string().trim().max(3_000_000).optional(),
 });
 
 export const adminSaveNurse = createServerFn({ method: "POST" })
@@ -261,6 +265,10 @@ export const adminSaveNurse = createServerFn({ method: "POST" })
       status: data.status,
       area: data.area ?? null,
       specialties: data.specialties,
+      tier: data.tier,
+      login_pin: data.login_pin,
+      active: data.active,
+      photo_url: data.photo_url || null,
     };
     const query = data.id
       ? supabaseAdmin.from("nurses").update(row).eq("id", data.id)

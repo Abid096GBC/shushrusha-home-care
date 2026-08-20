@@ -75,7 +75,7 @@ const productSchema = z.object({
   unit: z.string().trim().max(40).default("pc"),
   price: z.number().min(0).max(1000000),
   discount_pct: z.number().min(0).max(90).default(0),
-  image_url: z.string().trim().max(600).optional(),
+  image_url: z.string().trim().max(3_000_000).optional(),
   active: z.boolean().default(true),
 });
 

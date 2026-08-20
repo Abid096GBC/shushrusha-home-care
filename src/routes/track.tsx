@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, Loader2, Search, Star } from "lucide-react";
+import { Check, Loader2, QrCode, Search, Star } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { WhatsAppFab } from "@/components/WhatsAppFab";
@@ -30,6 +30,36 @@ export const Route = createFileRoute("/track")({
 });
 
 type Result = Awaited<ReturnType<typeof trackBooking>>;
+
+/** Patient QR — the nurse scans this to mark the visit complete. */
+function PatientQR({ trackingId }: { trackingId: string }) {
+  const [src, setSrc] = useState("");
+  useEffect(() => {
+    let alive = true;
+    void import("qrcode").then(async (m) => {
+      const url = await m.default.toDataURL(`SHUSHRUSHA:${trackingId}`, { width: 320, margin: 1 });
+      if (alive) setSrc(url);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [trackingId]);
+  return (
+    <div className="mt-6 rounded-2xl border border-primary/20 bg-secondary p-5 text-center">
+      <h2 className="flex items-center justify-center gap-2 text-base font-bold text-foreground">
+        <QrCode className="size-5 text-primary" /> পেশেন্ট QR কোড
+      </h2>
+      <p className="mt-1 text-xs text-muted-foreground">
+        সেবা শেষে নার্স এই QR কোডটি স্ক্যান করলেই অর্ডারটি “Completed” হবে।
+      </p>
+      {src ? (
+        <img src={src} alt={`ট্র্যাকিং ${trackingId} এর QR কোড`} className="mx-auto mt-4 size-48 rounded-xl bg-white p-2" />
+      ) : (
+        <Loader2 className="mx-auto mt-4 animate-spin text-primary" />
+      )}
+    </div>
+  );
+}
 
 function TrackPage() {
   const track = useServerFn(trackBooking);
@@ -136,6 +166,8 @@ function TrackPage() {
                 </div>
               )}
             </dl>
+
+            {res.status !== "Completed" && res.status !== "Cancelled" && <PatientQR trackingId={res.trackingId} />}
 
             {res.status === "Completed" && (
               <div className="mt-6 rounded-2xl border border-primary/20 bg-secondary p-5">

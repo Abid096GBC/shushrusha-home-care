@@ -393,7 +393,6 @@ function stepsFor(id: string): Step[] {
               onSelect={(v) => set({ saline_mode: v })}
               options={[
                 { value: "স্যালাইন সেটআপ (ক্যানুলা আছে)", label: "স্যালাইন সেটআপ", hint: "ক্যানুলা আগে থেকেই আছে — ৳৩০০" },
-                { value: "ক্যানুলা ইনসার্শন", label: "শুধু ক্যানুলা ইনসার্শন", hint: "৳৫০০" },
                 { value: "ক্যানুলা + স্যালাইন পুশ", label: "ক্যানুলা + স্যালাইন পুশ", hint: "৳৬০০" },
               ]}
             />
@@ -407,12 +406,52 @@ function stepsFor(id: string): Step[] {
               value={s["saline_type"]}
               onSelect={(v) => set({ saline_type: v })}
               options={[
-                { value: "Normal Saline", label: "Normal Saline (NS)" },
+                { value: "Normal Saline (NS)", label: "Normal Saline (NS)" },
                 { value: "DNS", label: "DNS" },
-                { value: "Cholera Saline", label: "কলেরা স্যালাইন" },
-                { value: "প্রযোজ্য নয়", label: "প্রযোজ্য নয় (শুধু ক্যানুলা)" },
+                { value: "Cholera Saline", label: "কলেরা স্যালাইন (Cholera Saline)" },
               ]}
             />
+          ),
+        },
+        {
+          title: "স্যালাইন / ওষুধের নাম ও রোগীর তথ্য",
+          validate: (s) =>
+            String(s["saline_product"] ?? "").trim().length < 2
+              ? "স্যালাইন বা ওষুধের নাম লিখুন"
+              : s["category"]
+                ? null
+                : "রোগীর ক্যাটাগরি নির্বাচন করুন",
+          render: (s, set) => (
+            <div className="space-y-4">
+              <div>
+                <Label>স্যালাইন / সঙ্গে দেওয়া ওষুধের নাম</Label>
+                <div className="mt-1.5">
+                  <MedicineSearch
+                    value={String(s["saline_product"] ?? "")}
+                    onChange={(v) => set({ saline_product: v })}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>ব্যাগ সংখ্যা</Label>
+                <div className="mt-2">
+                  <Counter value={Number(s["bag_count"] ?? 1)} onChange={(n) => set({ bag_count: Math.max(1, n) })} />
+                </div>
+              </div>
+              <div>
+                <Label>রোগীর ক্যাটাগরি</Label>
+                <div className="mt-1.5">
+                  <Choice
+                    value={s["category"]}
+                    onSelect={(v) => set({ category: v })}
+                    options={[
+                      { value: "বড় / Adult", label: "বড় / Adult" },
+                      { value: "বাচ্চা / Child", label: "বাচ্চা / Child" },
+                    ]}
+                  />
+                </div>
+              </div>
+            </div>
           ),
         },
       ];
@@ -422,18 +461,38 @@ function stepsFor(id: string): Step[] {
           title: "সেবার মোড",
           validate: (s) => (s["mode"] ? null : "মোড নির্বাচন করুন"),
           render: (s, set) => (
-            <Choice
-              value={s["mode"]}
-              onSelect={(v) => set({ mode: v })}
-              options={[
-                { value: "এক সেশন (ওষুধ ছাড়া)", label: "এক সেশন — ওষুধ ছাড়া", hint: "৳৫০" },
-                { value: "এক সেশন (ওষুধসহ)", label: "এক সেশন — ওষুধসহ", hint: "৳১০০" },
-                { value: "মেশিন রেন্ট ৭ দিন", label: "৭ দিনের মেশিন রেন্ট", hint: "৳৫০০ (ওষুধ আলাদা)" },
-              ]}
+            <div>
+              <Choice
+                value={s["mode"]}
+                onSelect={(v) => set({ mode: v })}
+                options={[
+                  { value: "এক সেশন (ওষুধ ছাড়া)", label: "এক সেশন — ওষুধ ছাড়া", hint: "৳৫০" },
+                  { value: "এক সেশন (ওষুধসহ)", label: "এক সেশন — ওষুধসহ", hint: "৳১০০" },
+                  { value: "মেশিন রেন্ট ৭ দিন", label: "৭ দিনের মেশিন রেন্ট", hint: "৳৫০০ (ওষুধ আলাদা)" },
+                ]}
+              />
+              {String(s["mode"] ?? "").includes("রেন্ট") && <NebAvailability />}
+            </div>
+          ),
+        },
+        {
+          title: "সেশনের সময় (স্প্লিট টাইম স্লট)",
+          validate: (s) =>
+            String(s["split_slots"] ?? "").trim() ? null : "কমপক্ষে একটি সময় স্লট যোগ করুন",
+          render: (s, set) => (
+            <SlotPicker
+              state={s}
+              set={set}
+              label={
+                String(s["mode"] ?? "").includes("রেন্ট")
+                  ? "মেশিন ডেলিভারি ও ফেরত নেওয়ার সময় যোগ করুন।"
+                  : "প্রতিটি নেবুলাইজেশন সেশনের জন্য আলাদা সময় দিন।"
+              }
             />
           ),
         },
       ];
+
     case "vitals":
       return [
         {
@@ -574,8 +633,10 @@ function estimate(id: string, s: State): { label: string; amount?: number } {
   const P = PRICES;
   switch (id) {
     case "injection": {
-      const amount = s["category"] === "বাচ্চা / Child" ? P.injectionChild : P.injectionAdult;
-      return { label: bn(amount), amount };
+      const per = s["category"] === "বাচ্চা / Child" ? P.injectionChild : P.injectionAdult;
+      const doses = Math.max(1, Number(s["dose_count"] ?? 1));
+      const amount = per * doses;
+      return { label: doses > 1 ? `${bn(amount)} (${doses} × ${bn(per)})` : bn(amount), amount };
     }
     case "suturing": {
       const n = Number(s["stitch_count"] ?? 0);
@@ -599,12 +660,10 @@ function estimate(id: string, s: State): { label: string; amount?: number } {
     }
     case "saline": {
       const mode = String(s["saline_mode"] ?? "");
-      const amount = mode.includes("ক্যানুলা + স্যালাইন")
-        ? P.cannulaSaline
-        : mode.includes("ক্যানুলা")
-          ? P.cannulaOnly
-          : P.salineOnly;
-      return { label: bn(amount), amount };
+      const per = mode.includes("ক্যানুলা + স্যালাইন") ? P.cannulaSaline : P.salineOnly;
+      const bags = Math.max(1, Number(s["bag_count"] ?? 1));
+      const amount = per * bags;
+      return { label: bags > 1 ? `${bn(amount)} (${bags} × ${bn(per)})` : bn(amount), amount };
     }
     case "translator":
       return { label: "সম্পূর্ণ ফ্রি", amount: 0 };
